@@ -3,6 +3,7 @@ import { CreatureArt } from './creatures/CreatureArt';
 import type { Mood } from './creatures/parts';
 import type { OwnedCreature } from '../domain/types';
 import { BerryIcon, HeartIcon, SparkIcon } from './Icons';
+import { FEED_XP } from '../domain/rewards';
 
 interface Props {
   creature: OwnedCreature;
@@ -78,6 +79,7 @@ function Effects({ mood, fxKey }: { mood: Mood; fxKey: number }) {
     return (
       <div className="fx" key={`eat-${fxKey}`} style={{ inset: 0 }} aria-hidden="true">
         <BerryIcon className="crumb" style={{ color: '#d6456b' }} />
+        <span className="grow-pop">+{FEED_XP} ★</span>
       </div>
     );
   }

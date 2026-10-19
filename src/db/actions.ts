@@ -2,11 +2,11 @@ import { buildChoices } from '../domain/distractors';
 import { pickNewSpecies, pendingEggs, stageForXp, VARIANT_COUNT } from '../domain/creatures';
 import { allAccepted, gradeAnswer, isSubstantialChange, normalize } from '../domain/normalize';
 import { pick, uuid, type Rng } from '../domain/rng';
-import { grantReward, rewardKey } from '../domain/rewards';
+import { feedGrowth, grantReward, rewardKey } from '../domain/rewards';
 import { selectExtraPractice, selectForSession, DEFAULT_SIZE } from '../domain/selection';
 import { applyReview, effectiveNow, modeFor, newProgress } from '../domain/srs';
 import type {
-  AnswerResult, GameState, OwnedCreature, Session, SessionItem, SessionSummary, Settings, VocabularyList, Word,
+  AnswerResult, GameState, OwnedCreature, Session, SessionItem, SessionSummary, Settings, Stage, VocabularyList, Word,
   WordProgress,
 } from '../domain/types';
 import type { WordlingDB } from './db';
@@ -221,13 +221,22 @@ export async function setActiveCreature(db: WordlingDB, creatureId: string) {
   });
 }
 
-/** Feeding costs one food and has no downside; it never changes XP or stage. */
-export async function feedCreature(db: WordlingDB): Promise<boolean> {
-  return db.transaction('rw', db.game, async () => {
+export interface FeedOutcome {
+  xp: number;
+  evolved: { from: Stage; to: Stage } | null;
+}
+
+/** Feeding costs one food and makes the active creature grow (see feedGrowth). Atomic. */
+export async function feedCreature(db: WordlingDB): Promise<FeedOutcome | null> {
+  return db.transaction('rw', [db.game, db.creatures], async () => {
     const g = await db.game.get('main');
-    if (!g || g.food < 1 || !g.activeCreatureId) return false;
+    if (!g || g.food < 1 || !g.activeCreatureId) return null;
+    const c = await db.creatures.get(g.activeCreatureId);
+    if (!c) return null;
+    const grown = feedGrowth(c);
+    await db.creatures.put(grown.creature);
     await db.game.update('main', { food: g.food - 1 });
-    return true;
+    return { xp: grown.xp, evolved: grown.evolved };
   });
 }
 

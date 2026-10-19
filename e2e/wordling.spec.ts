@@ -139,7 +139,7 @@ test('egg unlocks with XP, hatches a new species, and the active creature can be
   await expect.poll(async () => (await readTable<Game>(page, 'GameState'))[0]!.activeCreatureId).toBe(second.id);
 });
 
-test('pet, feed, play and sleep respond; feeding costs food only', async ({ page }) => {
+test('pet, feed, play and sleep respond; feeding costs food and makes the creature grow', async ({ page }) => {
   await firstStart(page);
   await patchGame(page, { food: 3 });
   await page.reload();
@@ -154,7 +154,8 @@ test('pet, feed, play and sleep respond; feeding costs food only', async ({ page
   await expect(page.locator('.creature.mood-sleep')).toBeVisible();
   const game = (await readTable<Game>(page, 'GameState'))[0]!;
   expect(game.food).toBe(2);
-  expect((await readTable<Creature>(page, 'OwnedCreatures'))[0]!.xp).toBe(creature.xp);
+  expect(game.totalXp).toBe(0); // eggs still depend on practice only
+  expect((await readTable<Creature>(page, 'OwnedCreatures'))[0]!.xp).toBe(creature.xp + 4);
 });
 
 test('works offline after the first load', async ({ page, context }) => {

@@ -30,6 +30,7 @@ export function HomeScreen({ onTrain, onSettings, onHatch, onCollection, backupD
   const [mood, setMood] = useState<Mood>('idle');
   const [fxKey, setFxKey] = useState(0);
   const [announce, setAnnounce] = useState('');
+  const [evolved, setEvolved] = useState(false);
   const timer = useRef<number | undefined>(undefined);
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
@@ -55,10 +56,18 @@ export function HomeScreen({ onTrain, onSettings, onHatch, onCollection, backupD
   };
   const feed = async () => {
     if (mood === 'eat') return;
-    const ok = await feedCreature(db);
-    if (!ok) return;
+    const fed = await feedCreature(db);
+    if (!fed) return;
     playSfx('feed');
-    show('eat', 1900, `${info.name} äter`);
+    show('eat', 1900, `${info.name} äter och växer`);
+    if (fed.evolved) {
+      window.setTimeout(() => {
+        playSfx('evolve');
+        show('play', 2200, `${info.name} har utvecklats!`);
+        setEvolved(true);
+        window.setTimeout(() => setEvolved(false), 3500);
+      }, 2000);
+    }
   };
   const play = () => {
     playSfx('reward');
@@ -113,6 +122,11 @@ export function HomeScreen({ onTrain, onSettings, onHatch, onCollection, backupD
             <i style={{ width: `${pct}%` }} />
           </div>
         </div>
+        {evolved && (
+          <p className="chip" style={{ background: 'var(--color-mint)', color: '#0f4d38' }} role="status">
+            {info.name} har utvecklats!
+          </p>
+        )}
         <p className="sr-only" aria-live="polite">{announce}</p>
       </div>
 

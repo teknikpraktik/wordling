@@ -210,13 +210,25 @@ describe('XP -> eggs -> evolution', () => {
     expect((await db.creatures.get(other.id))!.xp).toBeGreaterThan(0);
   });
 
-  it('feeding consumes food but never XP, and fails gracefully without food', async () => {
+  it('feeding costs one food and makes the creature grow, without touching egg XP', async () => {
     await hatchFirst();
-    expect(await feedCreature(db)).toBe(false);
+    expect(await feedCreature(db)).toBeNull(); // no food, nothing happens
     await db.game.update('main', { food: 2 });
-    expect(await feedCreature(db)).toBe(true);
+    const r = await feedCreature(db);
+    expect(r!.xp).toBe(4);
     expect((await db.game.get('main'))!.food).toBe(1);
-    expect((await db.creatures.toArray())[0]!.xp).toBe(0);
+    expect((await db.creatures.toArray())[0]!.xp).toBe(4);
+    expect((await db.game.get('main'))!.totalXp).toBe(0);
+  });
+
+  it('can evolve the creature by feeding', async () => {
+    await hatchFirst();
+    const c = (await db.creatures.toArray())[0]!;
+    await db.creatures.update(c.id, { xp: 148 });
+    await db.game.update('main', { food: 1 });
+    const r = await feedCreature(db);
+    expect(r!.evolved).toEqual({ from: 1, to: 2 });
+    expect((await db.creatures.get(c.id))!.stage).toBe(2);
   });
 });
 

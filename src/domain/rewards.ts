@@ -46,3 +46,27 @@ export function grantReward(
   }
   return { granted: true, game: nextGame, creature: nextCreature, xp, food, evolved };
 }
+
+/** Growth the active creature gets from eating one piece of food. */
+export const FEED_XP = 4;
+
+export interface FeedResult {
+  creature: OwnedCreature;
+  xp: number;
+  evolved: { from: 1 | 2 | 3; to: 1 | 2 | 3 } | null;
+}
+
+/**
+ * Feeding makes the creature grow. It adds to the creature's own XP (stage growth) but not to the
+ * learning XP that unlocks eggs, so eggs still reflect actual practice. Food is only earned by
+ * practising, so this cannot be farmed.
+ */
+export function feedGrowth(creature: OwnedCreature): FeedResult {
+  const xp = creature.xp + FEED_XP;
+  const stage = stageForXp(xp);
+  return {
+    creature: { ...creature, xp, stage },
+    xp: FEED_XP,
+    evolved: stage > creature.stage ? { from: creature.stage, to: stage } : null,
+  };
+}

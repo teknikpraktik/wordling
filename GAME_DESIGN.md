@@ -18,7 +18,7 @@ Tre stadier per art (Bebis 0–149 XP, Växande 150–499, Fullt utvecklad 500+)
 Rätt flerval 5 XP + 1 mat · rätt skrivet 10 + 2 · rätt fördröjd repetition 15 + 2 · avslutat pass 10 + 3 · fel 0. XP dras aldrig av. Belöning per (pass, glosa, nivå) högst en gång; passbonus kräver minst ett belönat svar. XP går till den aktiva figuren och till det totala XP som styr äggen.
 
 ## Ägg
-Trösklar för totalt XP: 0, 250, 650, 1 200, 1 900, 2 800. Nya arter slumpas bland de man inte äger (inga dubbletter). När samlingen är komplett ger ytterligare ägg (var 1 500:e XP) en kosmetisk färgvariant. Mat används för att mata figuren (bara glädje, påverkar inte XP).
+Trösklar för totalt XP: 0, 250, 650, 1 200, 1 900, 2 800. Nya arter slumpas bland de man inte äger (inga dubbletter). När samlingen är komplett ger ytterligare ägg (var 1 500:e XP) en kosmetisk färgvariant. Mat används för att mata figuren: varje frukt ger den aktiva figuren +4 XP, så den växer och kan utvecklas av maten. Matningen räknas inte in i det XP som låser upp ägg – äggen speglar fortfarande faktisk träning. Mat kan bara tjänas genom träning, så det går inte att odla.
 
 ## Interaktioner
 Klappa (tryck på figuren), mata, sov, leka, spontana hopp, byta kompis, samling med silhuetter för dolda arter, kläckning.
