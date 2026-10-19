@@ -21,10 +21,8 @@ try {
   await png(full, 192).toFile(out('icon-192.png'));
   await png(full, 512).toFile(out('icon-512.png'));
   await png(full, 180).toFile(out('apple-touch-icon.png'));
-  // Maskable: artwork scaled into the central safe zone on a full-bleed background.
-  const inner = await png(full, 512).resize(410, 410).toBuffer();
-  await sharp({ create: { width: 512, height: 512, channels: 4, background: '#6B49C8' } })
-    .composite([{ input: inner, gravity: 'center' }]).png().toFile(out('icon-maskable-512.png'));
+  // Maskable: the artwork is already centred inside the 80 % safe zone on a full-bleed background.
+  await png(full, 512).toFile(out('icon-maskable-512.png'));
   console.log('icons written');
 } finally {
   await server.close();

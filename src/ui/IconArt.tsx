@@ -10,8 +10,8 @@ export function AppIcon({ rounded = false }: { rounded?: boolean }) {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
       <defs>
         <radialGradient id="bg" cx="50%" cy="38%" r="80%">
-          <stop offset="0" stopColor="#8F72E6" />
-          <stop offset="1" stopColor="#4B2C9E" />
+          <stop offset="0" stopColor="#3D2780" />
+          <stop offset="1" stopColor="#150B38" />
         </radialGradient>
         <filter id="outline" x="-10%" y="-10%" width="120%" height="120%">
           <feMorphology in="SourceAlpha" operator="dilate" radius="7" result="grow" />
@@ -24,11 +24,11 @@ export function AppIcon({ rounded = false }: { rounded?: boolean }) {
         </filter>
       </defs>
       <rect width="512" height="512" rx={rounded ? 112 : 0} fill="url(#bg)" />
-      <circle cx="256" cy="262" r="168" fill="#ffffff" opacity="0.16" />
-      <circle cx="256" cy="262" r="124" fill="#ffffff" opacity="0.12" />
+      <circle cx="256" cy="262" r="168" fill="#ffffff" opacity="0.13" />
+      <circle cx="256" cy="262" r="124" fill="#ffffff" opacity="0.09" />
       <g filter="url(#outline)">
-        <svg x="62" y="70" width="388" height="388" viewBox="0 0 200 200" overflow="visible">
-          <CreatureArt species="moffi" stage={2} mood="happy" noShadow label="Wordling" />
+        <svg x="62" y="38" width="388" height="388" viewBox="0 0 200 200" overflow="visible">
+          <CreatureArt species="glimmo" stage={2} mood="happy" noShadow label="Wordling" />
         </svg>
       </g>
       <SparkIcon x="84" y="84" width="46" height="46" />
