@@ -23,7 +23,7 @@ export function TrainScreen({ onExit, onHatch, onImport }: Props) {
 
   if (finished) return <Summary session={finished} onExit={onExit} onHatch={onHatch} />;
   if (active === 'loading') return <div className="train" />;
-  if (active) return <QuestionView key={active.id} session={active} onExit={onExit} onFinished={setFinished} />;
+  if (active) return <QuestionView key={`${active.id}:${active.queue[active.index]?.qid}`} session={active} onExit={onExit} onFinished={setFinished} />;
   return <Idle onExit={onExit} onImport={onImport} onFinished={setFinished} />;
 }
 

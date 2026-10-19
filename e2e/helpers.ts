@@ -62,6 +62,9 @@ export async function runSession(page: Page, opts: { wrongFirst?: boolean } = {}
     await answer(page, !!opts.wrongFirst && n === 0);
     n++;
     await nextQuestion(page);
+    // the previous answer must never linger in the input field
+    const input = page.getByLabel('Ditt svar på engelska');
+    if (await input.count()) await expect(input).toHaveValue('');
     if (await page.getByRole('heading', { name: 'Bra jobbat!' }).isVisible()) break;
   }
   await expect(page.getByRole('heading', { name: 'Bra jobbat!' })).toBeVisible();
