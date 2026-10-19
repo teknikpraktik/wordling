@@ -297,7 +297,7 @@ describe('backup and restore', () => {
     broken.data.WordProgress = [{ ...good.data.WordProgress[0] }];
     broken.data.RewardEvents = [{ id: 'r', kind: 'typed', xp: 1, food: 1, at: 'x' }];
     const originalBulkAdd = db.table('RewardEvents').bulkAdd.bind(db.table('RewardEvents'));
-    db.table('RewardEvents').bulkAdd = (() => Promise.reject(new Error('disk full'))) as typeof originalBulkAdd;
+    db.table('RewardEvents').bulkAdd = (() => Promise.reject(new Error('disk full'))) as unknown as typeof originalBulkAdd;
     await expect(restoreBackup(db, broken)).rejects.toThrow();
     db.table('RewardEvents').bulkAdd = originalBulkAdd;
     expect(await db.words.count()).toBe(3); // old data intact
