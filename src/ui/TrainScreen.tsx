@@ -144,7 +144,7 @@ function QuestionView({ session, onExit, onFinished }: { session: Session; onExi
         <span className="text-sm font-extrabold muted" aria-label={`Fråga ${session.index + 1} av ${total}`}>{session.index + 1}/{total}</span>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto pt-6 pb-2 flex flex-col gap-4">
+      <div className="flex-1 min-h-0 overflow-y-auto pt-4 pb-2 flex flex-col gap-3">
         <div>
           <p className="muted font-extrabold">{item.mode === 'choice' ? 'Vad heter det på engelska?' : 'Skriv på engelska'}</p>
           <h1 className="q-word" lang="sv">{word.sv}</h1>
@@ -207,28 +207,32 @@ function QuestionView({ session, onExit, onFinished }: { session: Session; onExi
 
         {answered && (
           <div className={`feedback ${answered.correct ? 'good' : answered.verdict === 'typo' ? 'near' : 'miss'}`} role="status" aria-live="polite">
-            {answered.correct ? (
-              <p className="text-lg">Rätt!</p>
-            ) : answered.verdict === 'typo' ? (
-              <p>Nästan! Stava så här: <span lang="en" className="text-xl">{answered.expected}</span></p>
-            ) : (
-              <p>Rätt svar: <span lang="en" className="text-xl">{answered.expected}</span></p>
-            )}
-            {answered.reasked && !answered.correct && <p className="text-sm mt-1 font-bold">Vi tränar den igen strax.</p>}
-            {answered.reasked && answered.correct && <p className="text-sm mt-1 font-bold">Snart får du skriva den själv.</p>}
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                {answered.correct ? (
+                  <p className="text-lg">Rätt!</p>
+                ) : answered.verdict === 'typo' ? (
+                  <p>Nästan! Stava så här: <span lang="en" className="text-xl">{answered.expected}</span></p>
+                ) : (
+                  <p>Rätt svar: <span lang="en" className="text-xl">{answered.expected}</span></p>
+                )}
+                {answered.reasked && !answered.correct && <p className="text-sm mt-1 font-bold">Vi tränar den igen strax.</p>}
+                {answered.reasked && answered.correct && <p className="text-sm mt-1 font-bold">Snart får du skriva den själv.</p>}
+                {answered.evolved && creature && (
+                  <p className="mt-1">{speciesInfo(creature.species).name} har utvecklats!</p>
+                )}
+              </div>
+              {speechSupported() && (
+                <button type="button" className="icon-btn shrink-0" aria-label={`Lyssna på ${answered.expected}`} onClick={() => speak(answered.expected, { ...speech, enabled: true })}>
+                  <SpeakerIcon width="26" height="26" style={{ color: 'var(--color-lav-d)' }} />
+                </button>
+              )}
+            </div>
             {(answered.xp > 0 || answered.food > 0) && (
               <p className="gain mt-2" aria-label={`Du fick ${answered.xp} poäng och ${answered.food} mat`}>
                 <span className="inline-flex items-center gap-1"><StarIcon width="20" height="20" style={{ color: '#b07d00' }} />+{answered.xp}</span>
                 <span className="inline-flex items-center gap-1"><BerryIcon width="20" height="20" style={{ color: '#d6456b' }} />+{answered.food}</span>
               </p>
-            )}
-            {answered.evolved && creature && (
-              <p className="mt-2 text-lg">{speciesInfo(creature.species).name} har utvecklats!</p>
-            )}
-            {speechSupported() && (
-              <button type="button" className="btn btn-soft mt-3" onClick={() => speak(answered.expected, { ...speech, enabled: true })}>
-                <SpeakerIcon width="22" height="22" /> Lyssna
-              </button>
             )}
           </div>
         )}
