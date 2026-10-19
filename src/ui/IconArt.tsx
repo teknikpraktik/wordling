@@ -27,13 +27,13 @@ export function AppIcon({ rounded = false }: { rounded?: boolean }) {
       <circle cx="256" cy="262" r="168" fill="#ffffff" opacity="0.13" />
       <circle cx="256" cy="262" r="124" fill="#ffffff" opacity="0.09" />
       <g filter="url(#outline)">
-        <svg x="62" y="38" width="388" height="388" viewBox="0 0 200 200" overflow="visible">
+        <svg x="26" y="0" width="460" height="460" viewBox="0 0 200 200" overflow="visible">
           <CreatureArt species="glimmo" stage={2} mood="happy" noShadow label="Wordling" />
         </svg>
       </g>
       <SparkIcon x="84" y="84" width="46" height="46" />
       <SparkIcon x="392" y="132" width="34" height="34" />
-      <SparkIcon x="400" y="360" width="40" height="40" />
+      <SparkIcon x="60" y="410" width="40" height="40" />
       <HeartIcon x="72" y="330" width="40" height="40" />
     </svg>
   );
