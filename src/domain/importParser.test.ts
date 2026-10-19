@@ -50,21 +50,31 @@ describe('pairsFromOcr', () => {
   const line = (text: string, ws: [string, number, number][]): OcrLine => ({
     text, y0: 0, y1: 10, words: ws.map(([t, x0, x1]) => ({ text: t, x0, x1, confidence: 90 })),
   });
-  it('splits two-column layouts at the widest gap', () => {
-    const rows = pairsFromOcr([line('fjäril butterfly', [['fjäril', 10, 80], ['butterfly', 400, 500]])], 600);
+  it('reads English first and Swedish second, split at the widest gap', () => {
+    const rows = pairsFromOcr([line('butterfly fjäril', [['butterfly', 10, 120], ['fjäril', 400, 470]])], 600);
     expect(rows[0]).toMatchObject({ sv: 'fjäril', en: 'butterfly', confident: true });
   });
-  it('uses explicit separators', () => {
-    const rows = pairsFromOcr([line('1. hund - dog', [['1.', 0, 10], ['hund', 20, 60], ['-', 65, 70], ['dog', 75, 100]])], 600);
+  it('uses explicit separators (English - Swedish)', () => {
+    const rows = pairsFromOcr([line('1. dog - hund', [['1.', 0, 10], ['dog', 20, 60], ['-', 65, 70], ['hund', 75, 120]])], 600);
     expect(rows[0]).toMatchObject({ sv: 'hund', en: 'dog', confident: true });
+  });
+  it('presents everything in lower case', () => {
+    const rows = pairsFromOcr([line('Dog HUND', [['Dog', 10, 60], ['HUND', 400, 470]])], 600);
+    expect(rows[0]).toMatchObject({ sv: 'hund', en: 'dog' });
   });
   it('does not silently guess when pairing is unclear', () => {
     const rows = pairsFromOcr([line('the quick brown', [['the', 0, 30], ['quick', 36, 80], ['brown', 86, 130]])], 600);
-    expect(rows[0]).toMatchObject({ en: '', confident: false });
+    expect(rows[0]).toMatchObject({ sv: '', confident: false });
   });
   it('flags low-confidence reads', () => {
-    const l = line('hund dog', [['hund', 10, 60], ['dog', 400, 440]]);
+    const l = line('dog hund', [['dog', 10, 60], ['hund', 400, 440]]);
     l.words.forEach((w) => (w.confidence = 30));
     expect(pairsFromOcr([l], 600)[0]!.confident).toBe(false);
+  });
+});
+
+describe('case handling in paste import', () => {
+  it('lower-cases words', () => {
+    expect(parseWordList('Hund - DOG').pairs[0]).toEqual({ sv: 'hund', en: 'dog', alts: [] });
   });
 });

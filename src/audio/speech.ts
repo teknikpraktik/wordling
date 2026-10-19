@@ -10,18 +10,34 @@ export function speechSupported(): boolean {
   return typeof window !== 'undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
 }
 
-export function chooseVoice(voices: SpeechSynthesisVoice[], accent: 'gb' | 'us'): SpeechSynthesisVoice | null {
-  const english = voices.filter((v) => v.lang.toLowerCase().replace('_', '-').startsWith('en'));
-  if (!english.length) return null;
-  const order = accent === 'gb' ? ['en-gb', 'en-us'] : ['en-us', 'en-gb'];
-  for (const lang of order) {
-    const matches = english.filter((v) => v.lang.toLowerCase().replace('_', '-') === lang);
-    // Prefer on-device voices and "Daniel"/"Samantha"/"Kate" style natural ones.
-    const best = matches.find((v) => v.localService) ?? matches[0];
-    if (best) return best;
-  }
-  return english[0] ?? null;
+const MALE_NAMES = /\b(daniel|arthur|oliver|fred|alex|tom|ryan|george|david|mark|guy|rishi|aaron|gordon|james|thomas|male|man)\b/i;
+const FEMALE_NAMES =
+  /\b(kate|serena|martha|stephanie|samantha|allison|ava|susan|karen|moira|tessa|fiona|zira|hazel|libby|sonia|aria|jenny|catherine|victoria|female|woman)\b/i;
+
+function langOf(v: SpeechSynthesisVoice) {
+  return v.lang.toLowerCase().replace('_', '-');
 }
+
+/** Higher = better. Prefers a female voice, then the chosen accent, then on-device voices. */
+function score(v: SpeechSynthesisVoice, accent: 'gb' | 'us'): number {
+  let s = 0;
+  if (FEMALE_NAMES.test(v.name)) s += 100;
+  if (MALE_NAMES.test(v.name)) s -= 100;
+  if (langOf(v) === (accent === 'gb' ? 'en-gb' : 'en-us')) s += 20;
+  else if (langOf(v) === 'en-gb' || langOf(v) === 'en-us') s += 10;
+  if (v.localService) s += 5;
+  return s;
+}
+
+/** Picks an English voice, preferring a woman's voice (the app is for a child) in the chosen accent. */
+export function chooseVoice(voices: SpeechSynthesisVoice[], accent: 'gb' | 'us'): SpeechSynthesisVoice | null {
+  const english = voices.filter((v) => langOf(v).startsWith('en'));
+  if (!english.length) return null;
+  return [...english].sort((a, b) => score(b, accent) - score(a, accent))[0] ?? null;
+}
+
+/** Slightly raised pitch for a friendlier, younger-sounding voice. */
+const PITCH = 1.2;
 
 let cachedVoices: SpeechSynthesisVoice[] = [];
 
@@ -53,6 +69,7 @@ export function speak(text: string, opts: SpeechOptions): boolean {
       u.lang = opts.accent === 'gb' ? 'en-GB' : 'en-US';
     }
     u.rate = opts.rate;
+    u.pitch = PITCH;
     synth.speak(u);
     return true;
   } catch {

@@ -64,17 +64,18 @@ export interface WordInput {
 }
 
 function cleanInput(w: WordInput): { sv: string; en: string; alts: string[] } {
-  const en = w.en.trim().replace(/\s+/g, ' ');
+  // Upper/lower case is never significant: words are stored in lower case.
+  const en = w.en.trim().replace(/\s+/g, ' ').toLocaleLowerCase('en');
   const seen = new Set([normalize(en)]);
   const alts: string[] = [];
   for (const a of w.alts ?? []) {
-    const t = a.trim().replace(/\s+/g, ' ');
+    const t = a.trim().replace(/\s+/g, ' ').toLocaleLowerCase('en');
     if (t && !seen.has(normalize(t))) {
       seen.add(normalize(t));
       alts.push(t);
     }
   }
-  return { sv: w.sv.trim().replace(/\s+/g, ' '), en, alts };
+  return { sv: w.sv.trim().replace(/\s+/g, ' ').toLocaleLowerCase('sv'), en, alts };
 }
 
 export interface ListInput {

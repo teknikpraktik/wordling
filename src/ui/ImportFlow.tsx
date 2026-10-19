@@ -104,8 +104,10 @@ export function ImportFlow({ targetListId, onClose, onSaved }: Props) {
         return;
       }
       let list = parsed.map((p) => mkRow(p.sv, joinAlternatives(p.en, p.alts), p.confident ? undefined : p.note));
+      // Lists are read as English first, Swedish second. If it is clearly the other way round, flip it.
       if (detectSwap(list.map((r) => ({ sv: r.sv, en: r.en })))) {
-        setError('Engelskan verkar stå i första kolumnen. Använd "Byt kolumner" om det stämmer.');
+        list = list.map((r) => mkRow(r.en, r.sv, r.note));
+        setError('Svenskan verkade stå först, så jag bytte plats på kolumnerna. Kontrollera!');
       }
       list = list.filter((r) => r.sv || r.en);
       startRows(list);
@@ -153,7 +155,7 @@ export function ImportFlow({ targetListId, onClose, onSaved }: Props) {
             <div className="flex flex-col gap-4">
               <div className="card flex flex-col gap-3">
                 <h2 className="h2">Fota listan</h2>
-                <p className="muted font-bold text-sm">Bilden läses i telefonen och skickas aldrig någonstans.</p>
+                <p className="muted font-bold text-sm">Engelska ordet först, svenska i kolumnen bredvid. Bilden läses i telefonen och skickas aldrig någonstans.</p>
                 <label className="btn btn-primary w-full cursor-pointer" style={{ position: 'relative' }}>
                   <CameraIcon width="24" height="24" /> Ta kort
                   <input type="file" accept="image/*" capture="environment" className="absolute inset-0 opacity-0 cursor-pointer" aria-label="Ta kort på gloslistan" onChange={(e) => { void fromImage(e.target.files?.[0]); e.target.value = ''; }} data-testid="photo-camera" />

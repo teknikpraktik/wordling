@@ -223,6 +223,13 @@ test('camera import reads a printed two-column list on-device (OCR)', async ({ p
   for (const w of ['hund', 'dog', 'katt', 'cat', 'fjäril', 'butterfly', 'häst', 'horse', 'blomma', 'flower', 'hus', 'house']) {
     expect(values, `OCR should have read "${w}"`).toContain(w);
   }
+  // English is read from the first column and Swedish from the second; capitals are shown in lower case
+  const pairs = await page.locator('table.words tr').evaluateAll((trs) =>
+    trs.map((tr) => Array.from(tr.querySelectorAll('input')).map((i) => (i as HTMLInputElement).value)),
+  );
+  expect(pairs).toContainEqual(['fjäril', 'butterfly']);
+  expect(pairs).toContainEqual(['hund', 'dog']);
+  expect(pairs).toContainEqual(['katt', 'cat']);
   // the title line cannot be paired, so it is flagged instead of guessed
   await expect(page.getByText('Kunde inte avgöra vilket ord som hör ihop')).toBeVisible();
   await expect(page.getByText(/rad behöver kompletteras/)).toBeVisible();

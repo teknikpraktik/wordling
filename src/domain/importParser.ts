@@ -96,7 +96,11 @@ export function parseWordList(text: string): ParseResult {
       continue;
     }
     const { main, alts } = splitAlternatives(cols[1]);
-    pairs.push({ sv: cols[0].replace(/\s+/g, ' '), en: main.replace(/\s+/g, ' '), alts });
+    pairs.push({
+      sv: cols[0].replace(/\s+/g, ' ').toLocaleLowerCase('sv'),
+      en: main.replace(/\s+/g, ' ').toLocaleLowerCase('en'),
+      alts: alts.map((a) => a.toLocaleLowerCase('en')),
+    });
   }
   return { pairs, rejected, suggestSwap: detectSwap(pairs) };
 }

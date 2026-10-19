@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
 import { advanceSession, startSession, submitAnswer } from '../db/actions';
-import { allAccepted, gradeAnswer } from '../domain/normalize';
 import { speciesInfo } from '../domain/creatures';
 import type { Session } from '../domain/types';
 import { playSfx } from '../audio/sfx';
@@ -113,9 +112,6 @@ function QuestionView({ session, onExit, onFinished }: { session: Session; onExi
   const submit = async (answer: string) => {
     if (busy.current || answered) return;
     busy.current = true;
-    // Speak straight from the tap (iOS only allows speech from a user gesture).
-    const g = gradeAnswer(answer, allAccepted(word));
-    speak(g.expected, speech);
     try {
       const { result } = await submitAnswer(db, session.id, item.qid, answer);
       if (result.correct) playSfx('correct');

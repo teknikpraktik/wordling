@@ -48,7 +48,7 @@ function splitByGap(words: OcrWord[], pageWidth: number): [string, string, numbe
 }
 
 /**
- * Turns OCR lines into word pairs. Rows where the pairing is uncertain are returned with
+ * Turns OCR lines into word pairs (English column first, then Swedish; all lower case). Rows where the pairing is uncertain are returned with
  * `confident: false` and whatever text was read, so the user can fix them – nothing is guessed silently.
  */
 export function pairsFromOcr(lines: OcrLine[], pageWidth: number): OcrRow[] {
@@ -73,17 +73,18 @@ export function pairsFromOcr(lines: OcrLine[], pageWidth: number): OcrRow[] {
     }
 
     if (left && right) {
-      const { main, alts } = splitAlternatives(right);
+      // Printed vocabulary lists put the English word first, the Swedish second.
+      const { main, alts } = splitAlternatives(left);
       const lowConf = conf < MIN_CONFIDENCE;
       rows.push({
-        sv: left,
-        en: main,
-        alts,
+        sv: right.toLocaleLowerCase('sv'),
+        en: main.toLocaleLowerCase('en'),
+        alts: alts.map((a) => a.toLocaleLowerCase('en')),
         confident: !lowConf,
         note: lowConf ? 'Osäker avläsning – kontrollera' : undefined,
       });
     } else {
-      rows.push({ sv: text, en: '', alts: [], confident: false, note: 'Kunde inte avgöra vilket ord som hör ihop' });
+      rows.push({ sv: '', en: text.toLocaleLowerCase('en'), alts: [], confident: false, note: 'Kunde inte avgöra vilket ord som hör ihop' });
     }
   }
   return rows;

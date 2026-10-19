@@ -50,7 +50,7 @@ Inställningar → Säkerhetskopia. *Spara kopia* skapar en JSON-fil (delningsme
 ## Kända begränsningar
 
 - Data finns bara på enheten. Rensar användaren webbplatsdata i Safari försvinner den – därför backupen. (iOS kan även rensa PWA-data efter lång inaktivitet i vanlig Safari; en installerad hemskärmsapp är skyddad.)
-- OCR: tryckta listor med två kolumner fungerar bra; handskrift är experimentellt. Rader som inte kan paras ihop flaggas och måste rättas innan de kan sparas.
-- Uttal beror på systemets röster; saknas de blir uttalsknappen utan effekt och resten fungerar. Ljud måste startas av en tryckning (iOS-krav).
+- OCR: förutsätter engelska ordet först och svenska i kolumnen bredvid (byter automatiskt om det tydligt är tvärtom); alla ord lagras med små bokstäver. Tryckta listor med två kolumner fungerar bra; handskrift är experimentellt. Rader som inte kan paras ihop flaggas och måste rättas innan de kan sparas.
+- Uttal sker bara när man trycker på högtalarknappen. Appen väljer helst en kvinnoröst (brittisk, annars amerikansk) med lite höjd tonhöjd; vilka röster som finns beror på systemet; saknas de blir uttalsknappen utan effekt och resten fungerar. Ljud måste startas av en tryckning (iOS-krav).
 - Klockskydd: tiden kan aldrig gå bakåt jämfört med senast sedda tidpunkt, men en klocka som ställs *framåt* går inte att skilja från verklig tid utan server. Eftersom belöningar bara ges för glosor som verkligen är förfallna och per pass, ger det ingen oändlig XP.
 - Ingen riktig iPhone har använts under utvecklingen; se TESTING.md för manuell checklista.
