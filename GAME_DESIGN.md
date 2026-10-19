@@ -25,3 +25,9 @@ Klappa (tryck på figuren), mata, sov, leka, spontana hopp, byta kompis, samling
 
 ## Designprinciper
 Kawaii, pastellpalett (mint, lavendel, persika, ljusgult, gräddvitt), rundade former, mjuka skuggor, Nunito. Ett pass är en naturlig slutpunkt ("Klar"); appen försöker inte hålla kvar barnet.
+
+## Tillväxtspåret
+På Hem (kompakt) och i figurens detaljvy visas figurens liv som ett spår: tre mini-figurer (bebis → växande → fullvuxen) som blir större för varje steg, en stapel som visar var figuren är just nu (gul markör, proportionell mot 0–500 XP), tröskelvärdena 0/150/500 och hur många XP som återstår. Stadier man inte nått visas som siluetter – man ser hur stor figuren kan bli.
+
+## Matning
+Varje tryck på Mata är omedelbart: en ny matbit faller varje gång och animationerna lagras ovanpå varandra, så man kan mata snabbt med mycket mat. Databasanropet körs i bakgrunden och aldrig fler matningar än det finns mat.

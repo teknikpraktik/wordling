@@ -5,6 +5,7 @@ import { deleteList, deleteWord, renameList, updateWord, updateSettings } from '
 import { joinAlternatives, splitAlternatives } from '../domain/importParser';
 import { isSubstantialChange } from '../domain/normalize';
 import { currentList } from '../domain/selection';
+import { sentenceFor } from '../domain/cloze';
 import { isDue } from '../domain/srs';
 import type { VocabularyList, Word, WordProgress, WordState } from '../domain/types';
 import { BackIcon, PlusIcon, TrashIcon } from './Icons';
@@ -223,13 +224,15 @@ function RenameList({ list, onClose }: { list: VocabularyList; onClose: () => vo
 function EditWord({ word, onClose }: { word: Word; onClose: () => void }) {
   const [sv, setSv] = useState(word.sv);
   const [en, setEn] = useState(joinAlternatives(word.en, word.alts));
+  const [example, setExample] = useState(word.example ?? '');
   const [error, setError] = useState<string | null>(null);
   const parsed = splitAlternatives(en);
+  const builtIn = sentenceFor({ en: parsed.main || word.en, example: undefined });
   const willReset = isSubstantialChange(word.sv, sv) || isSubstantialChange(word.en, parsed.main);
 
   const save = async () => {
     try {
-      await updateWord(db, word.id, { sv, en: parsed.main, alts: parsed.alts });
+      await updateWord(db, word.id, { sv, en: parsed.main, alts: parsed.alts, example });
       onClose();
     } catch (e) {
       setError((e as Error).message);
@@ -243,6 +246,11 @@ function EditWord({ word, onClose }: { word: Word; onClose: () => void }) {
         <div>
           <label className="label" htmlFor="ew-en">Engelska (flera rätta svar: skilj med /)</label>
           <input id="ew-en" lang="en" className="field" value={en} onChange={(e) => setEn(e.target.value)} autoCapitalize="none" autoCorrect="off" spellCheck={false} />
+        </div>
+        <div>
+          <label className="label" htmlFor="ew-ex">Exempelmening på engelska (valfri, till luckövningen)</label>
+          <input id="ew-ex" lang="en" className="field" value={example} onChange={(e) => setExample(e.target.value)} placeholder={builtIn ?? `t.ex. I like my ${parsed.main || 'word'}.`} autoCapitalize="sentences" autoCorrect="off" spellCheck={false} />
+          <p className="text-xs font-bold muted mt-1">Meningen måste innehålla ordet. Tom ruta = {builtIn ? 'appens egen mening används' : 'ingen luckövning för det här ordet'}.</p>
         </div>
         {willReset && <p className="feedback near text-sm">Ordet får en ny betydelse, så träningen av just den här glosan börjar om.</p>}
         {error && <p role="alert" className="feedback miss">{error}</p>}

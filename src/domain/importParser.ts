@@ -4,6 +4,8 @@ export interface ParsedPair {
   sv: string;
   en: string;
   alts: string[];
+  /** Optional third column: an English example sentence. */
+  example?: string;
 }
 
 export interface ParseResult {
@@ -17,19 +19,24 @@ export interface ParseResult {
 const NUMBERING = /^\s*(?:\d{1,3}\s*[.)]|[-•*])\s+/;
 const DASH_SEPARATORS = [' - ', ' – ', ' — ', ' = ', ' : ', ' → ', ' -> ', ' > '];
 
-function splitLine(line: string): [string, string] | null {
+function splitLine(line: string): [string, string, string?] | null {
   if (line.includes('\t')) {
     const cols = line.split('\t').map((c) => c.trim()).filter(Boolean);
-    if (cols.length >= 2) return [cols[0]!, cols[1]!];
+    if (cols.length >= 2) return [cols[0]!, cols[1]!, cols[2]];
     return null;
   }
   if (line.includes(';')) {
-    const i = line.indexOf(';');
-    return [line.slice(0, i).trim(), line.slice(i + 1).trim()];
+    const cols = line.split(';').map((c) => c.trim());
+    return [cols[0]!, cols[1] ?? '', cols[2] || undefined];
   }
   for (const sep of DASH_SEPARATORS) {
     const i = line.indexOf(sep);
-    if (i > 0) return [line.slice(0, i).trim(), line.slice(i + sep.length).trim()];
+    if (i > 0) {
+      const rest = line.slice(i + sep.length);
+      const j = rest.indexOf(sep);
+      if (j > 0) return [line.slice(0, i).trim(), rest.slice(0, j).trim(), rest.slice(j + sep.length).trim() || undefined];
+      return [line.slice(0, i).trim(), rest.trim()];
+    }
   }
   if (/^[^:]+:[^:]+$/.test(line)) {
     const i = line.indexOf(':');
@@ -100,6 +107,7 @@ export function parseWordList(text: string): ParseResult {
       sv: cols[0].replace(/\s+/g, ' ').toLocaleLowerCase('sv'),
       en: main.replace(/\s+/g, ' ').toLocaleLowerCase('en'),
       alts: alts.map((a) => a.toLocaleLowerCase('en')),
+      ...(cols[2] ? { example: cols[2].replace(/\s+/g, ' ') } : {}),
     });
   }
   return { pairs, rejected, suggestSwap: detectSwap(pairs) };

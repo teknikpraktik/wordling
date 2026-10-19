@@ -41,13 +41,15 @@ export function CreatureArt({ species, stage, mood = 'idle', variant = 0, classN
 }
 
 /** Silhouette used for species the player has not found yet. */
-export function SilhouetteArt({ species, className = '' }: { species: SpeciesId; className?: string }) {
+export function SilhouetteArt({ species, stage = 2, className = '' }: { species: SpeciesId; stage?: Stage; className?: string }) {
   const info = speciesInfo(species);
   const Art = SPECIES_ART[species];
   return (
     <svg viewBox="0 0 200 200" role="img" aria-label="Okänd figur" className={`creature silhouette ${className}`}>
       <g style={{ filter: 'brightness(0) opacity(0.16)' }}>
-        <Art pal={info.palette} stage={2} mood="idle" />
+        <g transform={`translate(100 182) scale(${SCALE[stage]}) translate(-100 -182)`}>
+          <Art pal={info.palette} stage={stage} mood="idle" />
+        </g>
       </g>
     </svg>
   );

@@ -16,6 +16,8 @@ interface Row {
   en: string;
   note?: string;
   skip: boolean;
+  /** Optional third column from pasted text (English example sentence). */
+  example?: string;
 }
 
 interface Props {
@@ -26,7 +28,7 @@ interface Props {
 }
 
 let rowId = 1;
-const mkRow = (sv: string, en: string, note?: string, skip = false): Row => ({ id: rowId++, sv, en, note, skip });
+const mkRow = (sv: string, en: string, note?: string, skip = false, example?: string): Row => ({ id: rowId++, sv, en, note, skip, example });
 
 export function ImportFlow({ targetListId, onClose, onSaved }: Props) {
   const [step, setStep] = useState<'choose' | 'ocr' | 'preview'>('choose');
@@ -74,9 +76,9 @@ export function ImportFlow({ targetListId, onClose, onSaved }: Props) {
 
   const fromPaste = () => {
     const res = parseWordList(paste);
-    let list = res.pairs.map((p) => mkRow(p.sv, joinAlternatives(p.en, p.alts)));
+    let list = res.pairs.map((p) => mkRow(p.sv, joinAlternatives(p.en, p.alts), undefined, false, p.example));
     if (res.suggestSwap) {
-      list = swapColumns(res.pairs).map((p) => mkRow(p.sv, joinAlternatives(p.en, p.alts)));
+      list = swapColumns(res.pairs).map((p, i) => mkRow(p.sv, joinAlternatives(p.en, p.alts), undefined, false, res.pairs[i]?.example));
     }
     const bad = res.rejected.map((l) => mkRow(l, '', 'Hittade ingen avskiljare (t.ex. -). Fyll i själv eller ta bort.'));
     if (!list.length && !bad.length) {
@@ -126,7 +128,7 @@ export function ImportFlow({ targetListId, onClose, onSaved }: Props) {
     try {
       const words = toSave.map((r) => {
         const { main, alts } = splitAlternatives(r.en);
-        return { sv: r.sv, en: main, alts };
+        return { sv: r.sv, en: main, alts, example: r.example };
       });
       if (targetListId) {
         await addWords(db, targetListId, words);

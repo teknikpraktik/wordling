@@ -10,7 +10,7 @@ export async function firstStart(page: Page) {
   await page.goto('/');
   await page.getByRole('button', { name: 'Kläck ägget' }).click();
   await page.getByRole('button', { name: /^Hej,/ }).click();
-  await expect(page.getByRole('button', { name: 'TRÄNA', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^TRÄNA/ })).toBeVisible();
 }
 
 export async function importPasted(page: Page, text = LIST_TEXT, count = Object.keys(PAIRS).length) {

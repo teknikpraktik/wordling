@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { CreatureArt } from './creatures/CreatureArt';
 import type { Mood } from './creatures/parts';
 import type { OwnedCreature } from '../domain/types';
@@ -13,10 +13,12 @@ interface Props {
   onPet?: () => void;
   spontaneous?: boolean;
   label: string;
+  /** Food pieces currently falling to the creature. Several can be in the air at once. */
+  drops?: { id: number; dx: number }[];
 }
 
 /** The living creature: art + one-shot effects (hearts, crumbs, sparkles) + occasional spontaneous hops. */
-export function Creature({ creature, mood, fxKey, onPet, spontaneous = true, label }: Props) {
+export function Creature({ creature, mood, fxKey, onPet, spontaneous = true, label, drops = [] }: Props) {
   const [hop, setHop] = useState(false);
   const timer = useRef<number | undefined>(undefined);
 
@@ -53,6 +55,14 @@ export function Creature({ creature, mood, fxKey, onPet, spontaneous = true, lab
         art
       )}
       <Effects mood={mood} fxKey={fxKey} />
+      <div className="fx" style={{ inset: 0 }} aria-hidden="true">
+        {drops.map((d) => (
+          <span key={d.id}>
+            <BerryIcon className="crumb" style={{ color: '#d6456b', '--dx': `${d.dx}px` } as CSSProperties} />
+            <span className="grow-pop" style={{ '--dx': `${d.dx}px` } as CSSProperties}>+{FEED_XP} ★</span>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -72,14 +82,6 @@ function Effects({ mood, fxKey }: { mood: Mood; fxKey: number }) {
       <div className="fx" style={{ inset: 0 }} aria-hidden="true">
         <span className="zzz">Z</span>
         <span className="zzz z2">z</span>
-      </div>
-    );
-  }
-  if (mood === 'eat') {
-    return (
-      <div className="fx" key={`eat-${fxKey}`} style={{ inset: 0 }} aria-hidden="true">
-        <BerryIcon className="crumb" style={{ color: '#d6456b' }} />
-        <span className="grow-pop">+{FEED_XP} ★</span>
       </div>
     );
   }

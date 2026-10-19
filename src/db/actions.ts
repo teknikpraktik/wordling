@@ -1,5 +1,6 @@
 import { buildChoices } from '../domain/distractors';
 import { pickNewSpecies, pendingEggs, stageForXp, VARIANT_COUNT } from '../domain/creatures';
+import { clozeFor } from '../domain/cloze';
 import { allAccepted, gradeAnswer, isSubstantialChange, normalize } from '../domain/normalize';
 import { pick, uuid, type Rng } from '../domain/rng';
 import { feedGrowth, grantReward, rewardKey } from '../domain/rewards';
@@ -61,9 +62,11 @@ export interface WordInput {
   sv: string;
   en: string;
   alts?: string[];
+  /** Optional English example sentence (kept exactly as typed). */
+  example?: string;
 }
 
-function cleanInput(w: WordInput): { sv: string; en: string; alts: string[] } {
+function cleanInput(w: WordInput): { sv: string; en: string; alts: string[]; example?: string } {
   // Upper/lower case is never significant: words are stored in lower case.
   const en = w.en.trim().replace(/\s+/g, ' ').toLocaleLowerCase('en');
   const seen = new Set([normalize(en)]);
@@ -75,7 +78,8 @@ function cleanInput(w: WordInput): { sv: string; en: string; alts: string[] } {
       alts.push(t);
     }
   }
-  return { sv: w.sv.trim().replace(/\s+/g, ' ').toLocaleLowerCase('sv'), en, alts };
+  const example = w.example?.trim().replace(/\s+/g, ' ');
+  return { sv: w.sv.trim().replace(/\s+/g, ' ').toLocaleLowerCase('sv'), en, alts, ...(example ? { example } : {}) };
 }
 
 export interface ListInput {
@@ -109,7 +113,10 @@ async function insertWords(db: WordlingDB, listId: string, words: WordInput[], s
   for (const w of words) {
     const c = cleanInput(w);
     if (!c.sv || !c.en) continue;
-    rows.push({ id: uuid(), listId, sv: c.sv, en: c.en, alts: c.alts, position: pos++, createdAt: iso, updatedAt: iso });
+    rows.push({
+      id: uuid(), listId, sv: c.sv, en: c.en, alts: c.alts, ...(c.example ? { example: c.example } : {}),
+      position: pos++, createdAt: iso, updatedAt: iso,
+    });
   }
   await db.words.bulkAdd(rows);
   await db.progress.bulkAdd(rows.map((r) => newProgress(r.id)));
@@ -140,7 +147,9 @@ export async function updateWord(db: WordlingDB, wordId: string, input: WordInpu
     const c = cleanInput(input);
     if (!c.sv || !c.en) throw new Error('Både svenskt och engelskt ord krävs');
     const reset = isSubstantialChange(old.sv, c.sv) || isSubstantialChange(old.en, c.en);
-    await db.words.put({ ...old, ...c, updatedAt: now });
+    const { example: _drop, ...oldRest } = old;
+    void _drop;
+    await db.words.put({ ...oldRest, ...c, updatedAt: now });
     if (reset) await db.progress.put(newProgress(wordId));
     return { reset };
   });
@@ -244,6 +253,8 @@ export async function feedCreature(db: WordlingDB): Promise<FeedOutcome | null> 
 /* Sessions                                                                   */
 /* -------------------------------------------------------------------------- */
 
+/** Share of review questions that are asked as a fill-in-the-blank sentence (when a sentence exists). */
+export const CLOZE_SHARE = 0.4;
 const MAX_RETRIES_PER_WORD = 2;
 const MAX_QUEUE = DEFAULT_SIZE + 6;
 
@@ -275,8 +286,13 @@ export async function startSession(db: WordlingDB, opts: { extra?: boolean } & E
     const selected = opts.extra ? selectExtraPractice(input) : selectForSession(input);
     if (!selected.length) return null;
     const queue: SessionItem[] = selected.map((s) => {
-      const mode = modeFor(progress.get(s.word.id)!.state);
-      return makeItem(s.word, mode, words, rng, 0);
+      const state = progress.get(s.word.id)!.state;
+      // Known words sometimes come as a harder fill-in-the-blank sentence (only if a sentence exists).
+      if ((state === 'REVIEW' || state === 'MASTERED') && rng() < CLOZE_SHARE) {
+        const prompt = clozeFor(s.word);
+        if (prompt) return makeItem(s.word, 'cloze', words, rng, 0, prompt);
+      }
+      return makeItem(s.word, modeFor(state), words, rng, 0);
     });
     const session: Session = {
       id: uuid(), status: 'active', startedAt: now.toISOString(), finishedAt: null, extra: !!opts.extra,
@@ -288,8 +304,9 @@ export async function startSession(db: WordlingDB, opts: { extra?: boolean } & E
   });
 }
 
-function makeItem(word: Word, mode: SessionItem['mode'], pool: Word[], rng: Rng, attempt: number): SessionItem {
+function makeItem(word: Word, mode: SessionItem['mode'], pool: Word[], rng: Rng, attempt: number, prompt?: string): SessionItem {
   const item: SessionItem = { qid: uuid(), wordId: word.id, mode, attempt };
+  if (prompt) item.prompt = prompt;
   if (mode === 'choice') item.options = buildChoices(word, pool, rng).options;
   return item;
 }

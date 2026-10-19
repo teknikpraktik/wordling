@@ -26,9 +26,9 @@ test('first start: egg hatches into a stored creature', async ({ page }) => {
   // the result is stored before the reveal animation finishes
   await expect.poll(async () => (await readTable(page, 'OwnedCreatures')).length).toBe(1);
   await page.getByRole('button', { name: /^Hej,/ }).click();
-  await expect(page.getByRole('button', { name: 'TRÄNA', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^TRÄNA/ })).toBeVisible();
   await page.reload();
-  await expect(page.getByRole('button', { name: 'TRÄNA', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^TRÄNA/ })).toBeVisible();
   expect(await readTable(page, 'OwnedCreatures')).toHaveLength(1);
 });
 
@@ -54,7 +54,7 @@ test('import ten words, train, wrong answers get a second chance without penalty
   const creature = (await readTable<Creature>(page, 'OwnedCreatures'))[0]!;
   expect(creature.xp).toBe(game.totalXp);
   await page.getByRole('button', { name: 'Klar' }).click();
-  await expect(page.getByRole('button', { name: /^(TRÄNA|FORTSÄTT)$/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^(TRÄNA|FORTSÄTT)/ })).toBeVisible();
 });
 
 test('the reward system cannot be farmed by double taps or reloads', async ({ page }) => {
@@ -70,7 +70,7 @@ test('the reward system cannot be farmed by double taps or reloads', async ({ pa
   expect(before.totalXp).toBe(5);
   for (let i = 0; i < 3; i++) {
     await page.reload();
-    await page.getByRole('button', { name: 'FORTSÄTT', exact: true }).click(); // the unfinished session is resumed
+    await page.getByRole('button', { name: /^FORTSÄTT/ }).click(); // the unfinished session is resumed
     await expect(page.locator('.feedback')).toContainText('Rätt!'); // same question, same feedback
   }
   const after = (await readTable<Game>(page, 'GameState'))[0]!;
@@ -168,7 +168,7 @@ test('works offline after the first load', async ({ page, context }) => {
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
   await context.setOffline(true);
   await page.reload();
-  await expect(page.getByRole('button', { name: /^(TRÄNA|FORTSÄTT)$/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^(TRÄNA|FORTSÄTT)/ })).toBeVisible();
   await startTraining(page);
   await answer(page);
   await nextQuestion(page);
@@ -281,4 +281,56 @@ test('OCR keeps working offline once the language models are cached', async ({ p
   await page.reload();
   await readPhoto(); // offline
   await context.setOffline(false);
+});
+
+test('the growth track shows where the creature is and how big it can become', async ({ page }) => {
+  await firstStart(page);
+  const track = page.getByRole('progressbar', { name: /har vuxit/ });
+  await expect(track).toBeVisible();
+  await expect(track).toHaveAttribute('aria-valuetext', /0 av 500 XP\. Nu: Bebis/);
+  await expect(page.getByText(/150 XP|kvar till Växande/).first()).toBeVisible();
+  const creature = (await readTable<Creature>(page, 'OwnedCreatures'))[0]!;
+  await page.evaluate(
+    (id) =>
+      new Promise<void>((resolve) => {
+        const open = indexedDB.open('wordling');
+        open.onsuccess = () => {
+          const db = open.result;
+          const tx = db.transaction('OwnedCreatures', 'readwrite');
+          const st = tx.objectStore('OwnedCreatures');
+          const get = st.get(id);
+          get.onsuccess = () => st.put({ ...get.result, xp: 200, stage: 2 });
+          tx.oncomplete = () => { db.close(); resolve(); };
+        };
+      }),
+    creature.id,
+  );
+  await page.reload();
+  await expect(page.getByRole('progressbar', { name: /har vuxit/ })).toHaveAttribute('aria-valuetext', /200 av 500 XP\. Nu: Växande/);
+  await expect(page.getByText('300 kvar till Fullvuxen')).toBeVisible();
+});
+
+test('food can be fed in rapid succession, every tap counts and animations overlap', async ({ page }) => {
+  await firstStart(page);
+  await patchGame(page, { food: 12 });
+  await page.reload();
+  const feed = page.getByRole('button', { name: 'Mata' });
+  for (let i = 0; i < 6; i++) await feed.click({ delay: 0, noWaitAfter: true });
+  await expect.poll(async () => (await readTable<Game>(page, 'GameState'))[0]!.food).toBe(6);
+  expect((await readTable<Creature>(page, 'OwnedCreatures'))[0]!.xp).toBe(24);
+  await expect(page.locator('.creature.mood-eat')).toBeVisible();
+  // never more feedings than food: drain the rest and keep tapping
+  for (let i = 0; i < 9; i++) await feed.click({ delay: 0, noWaitAfter: true, force: true, timeout: 500 }).catch(() => undefined);
+  await expect.poll(async () => (await readTable<Game>(page, 'GameState'))[0]!.food).toBe(0);
+  expect((await readTable<Creature>(page, 'OwnedCreatures'))[0]!.xp).toBe(48);
+});
+
+test('a parent can add an example sentence to a word', async ({ page }) => {
+  await firstStart(page);
+  await importPasted(page);
+  await page.getByRole('button', { name: /Redigera hund/ }).click();
+  await page.getByLabel(/Exempelmening/).fill('The dog is very happy.');
+  await page.getByRole('button', { name: 'Spara', exact: true }).click();
+  const words = await readTable<{ sv: string; example?: string }>(page, 'Words');
+  expect(words.find((w) => w.sv === 'hund')!.example).toBe('The dog is very happy.');
 });

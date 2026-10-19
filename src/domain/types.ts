@@ -1,5 +1,5 @@
 export type WordState = 'NEW' | 'LEARNING' | 'REVIEW' | 'RELEARNING' | 'MASTERED';
-export type QuestionMode = 'choice' | 'typed';
+export type QuestionMode = 'choice' | 'typed' | 'cloze';
 export type Verdict = 'correct' | 'typo' | 'wrong' | 'empty';
 export type RewardKind = 'choice' | 'typed' | 'delayed' | 'session';
 export type Stage = 1 | 2 | 3;
@@ -22,6 +22,8 @@ export interface Word {
   sv: string;
   en: string;
   alts: string[];
+  /** Optional example sentence (English) used for fill-in-the-blank questions. */
+  example?: string;
   position: number;
   createdAt: string;
   updatedAt: string;
@@ -61,6 +63,8 @@ export interface SessionItem {
   mode: QuestionMode;
   /** Persisted so a reload shows the same options. */
   options?: string[];
+  /** Fill-in-the-blank sentence with the blank already in place (cloze questions). */
+  prompt?: string;
   /** 0 = first ask in this session; >0 = re-ask / follow-up. */
   attempt: number;
 }

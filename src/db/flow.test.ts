@@ -171,6 +171,57 @@ describe('rewards are idempotent and tamper-proof', () => {
   });
 });
 
+describe('fill-in-the-blank sentences', () => {
+  const makeReviewWords = async () => {
+    await hatchFirst();
+    await createList(db, { name: 'v', weekNumber: 1 }, [
+      { sv: 'hund', en: 'dog' },
+      { sv: 'pungråtta', en: 'quokka' },
+      { sv: 'skratta', en: 'smile', example: 'The baby will smile at you.' },
+    ], { now: day(1) });
+    for (const p of await db.progress.toArray()) {
+      await db.progress.update(p.wordId, { state: 'REVIEW', step: 1, intervalDays: 3, dueAt: day(1, 0).toISOString() });
+    }
+  };
+
+  it('asks known words as a sentence with a gap (built-in or typed-in sentence), never leaking the answer', async () => {
+    await makeReviewWords();
+    const s = (await startSession(db, { now: day(5), rng: () => 0 }))!;
+    const byWord = new Map<string, (typeof s.queue)[number]>();
+    for (const q of s.queue) byWord.set((await db.words.get(q.wordId))!.en, q);
+    expect(byWord.get('dog')!.mode).toBe('cloze');
+    expect(byWord.get('dog')!.prompt).toContain('_____');
+    expect(byWord.get('dog')!.prompt).not.toMatch(/\bdog\b/i);
+    expect(byWord.get('smile')!.mode).toBe('cloze');
+    expect(byWord.get('smile')!.prompt).toBe('The baby will _____ at you.');
+    expect(byWord.get('quokka')!.mode).toBe('typed'); // no sentence available -> normal typed question
+  });
+
+  it('grades a cloze answer like a typed answer and rewards it as delayed recall', async () => {
+    await makeReviewWords();
+    const s = (await startSession(db, { now: day(5), rng: () => 0 }))!;
+    const idx = s.queue.findIndex((q) => q.mode === 'cloze');
+    let cur: Session = s;
+    for (let i = 0; i < idx; i++) cur = (await answerCurrent(cur, { now: day(5) })).next;
+    const r = await answerCurrent(cur, { now: day(5) });
+    expect(r.result.correct).toBe(true);
+    expect(r.result.xp).toBe(15);
+    expect((await db.progress.get(r.word.id))!.step).toBe(2);
+  });
+
+  it('a wrong cloze answer re-asks the word as a normal typed question', async () => {
+    await makeReviewWords();
+    const s = (await startSession(db, { now: day(5), rng: () => 0 }))!;
+    const idx = s.queue.findIndex((q) => q.mode === 'cloze');
+    let cur: Session = s;
+    for (let i = 0; i < idx; i++) cur = (await answerCurrent(cur, { now: day(5) })).next;
+    const wrong = await answerCurrent(cur, { now: day(5) }, 'wrong');
+    expect(wrong.result.reasked).toBe(true);
+    const again = wrong.next.queue.slice(wrong.next.index).find((q) => q.wordId === wrong.word.id)!;
+    expect(again.mode).toBe('typed');
+  });
+});
+
 describe('XP -> eggs -> evolution', () => {
   it('earns an egg after 250 XP and hatches a different species', async () => {
     await hatchFirst();

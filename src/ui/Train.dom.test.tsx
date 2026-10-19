@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { db } from '../db/db';
-import { createList, ensureInitialized, hatchEgg } from '../db/actions';
+import { createList, ensureInitialized, hatchEgg, startSession } from '../db/actions';
 import { TrainScreen } from './TrainScreen';
 
 async function reset() {
@@ -56,5 +56,21 @@ describe('TrainScreen', () => {
     await user.click(wrong);
     expect(await screen.findByText(/Rätt svar:/)).toHaveTextContent(en);
     expect((await db.game.get('main'))!.totalXp).toBe(0);
+  });
+
+  it('shows a fill-in-the-blank sentence with the Swedish word as a hint and completes it after answering', async () => {
+    await createList(db, { name: 'v1', weekNumber: 1 }, [{ sv: 'hund', en: 'dog' }]);
+    await db.progress.toCollection().modify({ state: 'REVIEW', step: 1, intervalDays: 3, dueAt: new Date(2020, 0, 1).toISOString() });
+    await startSession(db, { rng: () => 0 });
+    const user = userEvent.setup();
+    render(<TrainScreen onExit={() => {}} onHatch={() => {}} onImport={() => {}} />);
+    const sentence = await screen.findByTestId('cloze-sentence');
+    expect(sentence).toHaveTextContent('_____');
+    expect(sentence).not.toHaveTextContent(/\bdog\b/);
+    expect(screen.getByText('hund')).toBeInTheDocument();
+    await user.type(screen.getByLabelText('Ditt svar på engelska'), 'dog');
+    await user.click(screen.getByRole('button', { name: 'Svara' }));
+    await waitFor(() => expect(screen.getByTestId('cloze-sentence')).toHaveTextContent('My dog likes to play in the garden.'));
+    expect(await screen.findByText('Rätt!')).toBeInTheDocument();
   });
 });

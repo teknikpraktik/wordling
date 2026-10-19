@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { db } from '../db/db';
 import { setActiveCreature } from '../db/actions';
-import { SPECIES, eggThreshold, speciesInfo, xpToNextStage } from '../domain/creatures';
+import { SPECIES, eggThreshold, speciesInfo } from '../domain/creatures';
 import type { OwnedCreature } from '../domain/types';
 import { playSfx } from '../audio/sfx';
 import { CreatureArt, EggArt, SilhouetteArt } from './creatures/CreatureArt';
 import { EggIcon } from './Icons';
+import { GrowthTrack } from './GrowthTrack';
 import { useCreatures, useGame, usePendingEggs } from './hooks';
 
 const STAGE = { 1: 'Bebis', 2: 'Växande', 3: 'Fullt utvecklad' } as const;
@@ -70,7 +71,6 @@ export function CreaturesScreen({ onHatch }: { onHatch: () => void }) {
 
 function Detail({ creature, active, onClose }: { creature: OwnedCreature; active: boolean; onClose: () => void }) {
   const info = speciesInfo(creature.species);
-  const next = xpToNextStage(creature.xp);
   const choose = async () => {
     await setActiveCreature(db, creature.id);
     playSfx('pet');
@@ -83,7 +83,7 @@ function Detail({ creature, active, onClose }: { creature: OwnedCreature; active
         <h2 className="h1">{info.name}</h2>
         <p className="font-extrabold muted">{info.stageNames[creature.stage - 1]}</p>
         <p className="font-bold my-2">{info.trait}</p>
-        <p className="font-extrabold">{creature.xp} XP{next ? ` · ${next.remaining} kvar till nästa nivå` : ' · Fullt utvecklad'}</p>
+        <div className="mt-3"><GrowthTrack creature={creature} /></div>
         <div className="flex gap-3 mt-4">
           <button type="button" className="btn btn-primary flex-1" onClick={choose} disabled={active}>
             {active ? 'Din kompis just nu' : `Välj ${info.name}`}

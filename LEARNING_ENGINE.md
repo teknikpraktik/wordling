@@ -35,3 +35,9 @@ Prioritet: ominlärning → förfallna → aktuell lista → äldre → nya. Må
 - Fel svar → samma frågetyp återkommer senare (max 2 gånger per glosa och pass, bara om det finns andra frågor kvar).
 - Rätt flerval på NEW → skriven uppföljning senare i samma pass om det finns plats.
 - Kön har ett tak (16) så passet förblir cirka 10 frågor.
+
+## Luckövning (fyll i meningen)
+
+Kända ord (REVIEW/MASTERED) ställs i ca 40 % av fallen som en mening med en lucka, t.ex. *"A small _____ is singing in the tree."* med det svenska ordet som ledtråd. Barnet skriver det engelska ordet. Den rättas och schemaläggs exakt som en vanlig skriven fråga (`cloze` räknas som skriven återkallning, dvs. 15 XP vid fördröjd repetition). Fel svar följs av en vanlig skriven fråga.
+
+Meningar kommer från (1) en mening som skrivits in på glosan (redigera glosa → *Exempelmening*, eller en tredje kolumn vid inklistring: `hund - dog - My dog barks.`) och annars (2) appens inbyggda bank med ca 120 vanliga skolord (`src/domain/sentences.ts`). Finns ingen mening, eller ordet inte förekommer i den, ställs en vanlig skriven fråga – en trasig lucka visas aldrig. Inga externa AI-anrop används.

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
 import { advanceSession, startSession, submitAnswer } from '../db/actions';
+import { fillBlank } from '../domain/cloze';
 import { speciesInfo } from '../domain/creatures';
 import type { Session } from '../domain/types';
 import { playSfx } from '../audio/sfx';
@@ -142,9 +143,17 @@ function QuestionView({ session, onExit, onFinished }: { session: Session; onExi
 
       <div className="flex-1 min-h-0 overflow-y-auto pt-4 pb-2 flex flex-col gap-3">
         <div>
-          <p className="muted font-extrabold">{item.mode === 'choice' ? 'Vad heter det på engelska?' : 'Skriv på engelska'}</p>
+          <p className="muted font-extrabold">
+            {item.mode === 'choice' ? 'Vad heter det på engelska?' : item.mode === 'cloze' ? 'Vilket engelskt ord saknas i meningen?' : 'Skriv på engelska'}
+          </p>
           <h1 className="q-word" lang="sv">{word.sv}</h1>
         </div>
+
+        {item.mode === 'cloze' && item.prompt && (
+          <p className="q-sentence" lang="en" data-testid="cloze-sentence">
+            {answered ? fillBlank(item.prompt, answered.expected) : item.prompt}
+          </p>
+        )}
 
         {item.mode === 'choice' ? (
           <ul className="flex flex-col gap-3 list-none p-0 m-0" aria-label="Svarsalternativ">
@@ -219,7 +228,7 @@ function QuestionView({ session, onExit, onFinished }: { session: Session; onExi
                 )}
               </div>
               {speechSupported() && (
-                <button type="button" className="icon-btn shrink-0" aria-label={`Lyssna på ${answered.expected}`} onClick={() => speak(answered.expected, { ...speech, enabled: true })}>
+                <button type="button" className="icon-btn shrink-0" aria-label={`Lyssna på ${answered.expected}`} onClick={() => speak(item.mode === 'cloze' && item.prompt ? fillBlank(item.prompt, answered.expected) : answered.expected, { ...speech, enabled: true })}>
                   <SpeakerIcon width="26" height="26" style={{ color: 'var(--color-lav-d)' }} />
                 </button>
               )}

@@ -39,6 +39,15 @@ describe('parseWordList', () => {
   });
 });
 
+describe('optional example sentence column', () => {
+  it('reads a third column with dashes, semicolons or tabs', () => {
+    expect(parseWordList('hund - dog - My dog barks.').pairs[0]).toMatchObject({ sv: 'hund', en: 'dog', example: 'My dog barks.' });
+    expect(parseWordList('hund;dog;My dog barks.').pairs[0]!.example).toBe('My dog barks.');
+    expect(parseWordList('hund\tdog\tMy dog barks.').pairs[0]!.example).toBe('My dog barks.');
+    expect(parseWordList('hund - dog').pairs[0]!.example).toBeUndefined();
+  });
+});
+
 describe('findDuplicates', () => {
   it('flags repeated rows and words already in the list', () => {
     const d = findDuplicates([{ sv: 'Hund', en: 'dog' }, { sv: 'katt', en: 'cat' }, { sv: ' hund ', en: 'dog' }], ['katt']);
