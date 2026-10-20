@@ -15,10 +15,10 @@ import { useActiveCreature, useGame, useSettings, useSettingsEffects, usePending
 type Tab = 'home' | 'train' | 'creatures' | 'words';
 
 const TABS: { id: Tab; label: string; Icon: typeof HomeIcon }[] = [
-  { id: 'home', label: 'Hem', Icon: HomeIcon },
-  { id: 'train', label: 'Träna', Icon: TrainIcon },
-  { id: 'creatures', label: 'Figurer', Icon: PawIcon },
-  { id: 'words', label: 'Glosor', Icon: BookIcon },
+  { id: 'home', label: 'Home', Icon: HomeIcon },
+  { id: 'train', label: 'Train', Icon: TrainIcon },
+  { id: 'creatures', label: 'Family', Icon: PawIcon },
+  { id: 'words', label: 'Words', Icon: BookIcon },
 ];
 
 export default function App() {
@@ -35,9 +35,9 @@ export default function App() {
   if (error) {
     return (
       <div className="app items-center justify-center text-center p-6" role="alert">
-        <h1 className="h1 mb-2">Något gick fel</h1>
-        <p className="font-bold muted">Wordling kunde inte öppna sin lagring i den här webbläsaren. ({error})</p>
-        <p className="font-bold muted mt-2">Stäng privat surfning och försök igen.</p>
+        <h1 className="h1 mb-2">Something went wrong</h1>
+        <p className="font-bold muted">Wordling could not open its storage in this browser. ({error})</p>
+        <p className="font-bold muted mt-2">Close private browsing and try again.</p>
       </div>
     );
   }
@@ -105,7 +105,7 @@ function Shell() {
       </main>
 
       {!training && (
-        <nav className="tabbar" aria-label="Huvudmeny">
+        <nav className="tabbar" aria-label="Main menu">
           {TABS.map(({ id, label, Icon }) => (
             <button key={id} type="button" className="tab" aria-current={tab === id ? 'page' : undefined} onClick={() => goTab(id)}>
               <Icon />
@@ -117,9 +117,9 @@ function Shell() {
 
       {(needRefresh || offlineReady) && (
         <div className="toast" role="status">
-          <span className="font-bold">{needRefresh ? 'En ny version finns.' : 'Klart! Wordling fungerar nu utan nätet.'}</span>
+          <span className="font-bold">{needRefresh ? 'A new version is available.' : 'All set! Wordling now works offline.'}</span>
           {needRefresh ? (
-            <button type="button" className="btn btn-mint" style={{ minHeight: 44 }} onClick={() => void updateServiceWorker(true)}>Uppdatera</button>
+            <button type="button" className="btn btn-mint" style={{ minHeight: 44 }} onClick={() => void updateServiceWorker(true)}>Update</button>
           ) : (
             <button type="button" className="btn btn-mint" style={{ minHeight: 44 }} onClick={() => { setOfflineReady(false); setNeedRefresh(false); }}>OK</button>
           )}

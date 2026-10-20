@@ -14,7 +14,7 @@ import { useGame, useSettings } from './hooks';
 import { effectiveNow } from '../domain/srs';
 
 const STATUS: Record<WordState, string> = {
-  NEW: 'Ny', LEARNING: 'Lär mig', REVIEW: 'Repeterar', RELEARNING: 'Tränas igen', MASTERED: 'Kan den!',
+  NEW: 'New', LEARNING: 'Learning', REVIEW: 'Reviewing', RELEARNING: 'Practising again', MASTERED: 'Got it!',
 };
 const COLORS: Record<WordState, string> = {
   NEW: '#FFE59A', LEARNING: '#FFC9A8', REVIEW: '#C9B6F2', RELEARNING: '#FFB48A', MASTERED: '#A8E6CF',
@@ -58,16 +58,16 @@ export function WordsScreen({ openImport, onImportHandled }: { openImport: boole
         ) : (
           <>
             <div className="flex items-center justify-between mb-3">
-              <h1 className="h1">Glosor</h1>
+              <h1 className="h1">Words</h1>
             </div>
             {backupDue && <BackupNudge />}
             <button type="button" className="btn btn-primary w-full mb-4" onClick={() => setView({ k: 'import' })}>
-              <PlusIcon width="24" height="24" /> Lägg in glosor
+              <PlusIcon width="24" height="24" /> Add words
             </button>
             {sorted.length === 0 && (
               <div className="card text-center">
-                <p className="font-extrabold">Inga listor ännu.</p>
-                <p className="muted font-bold">Fota eller klistra in veckans glosor så börjar äventyret.</p>
+                <p className="font-extrabold">No lists yet.</p>
+                <p className="muted font-bold">Photograph or paste this week’s words and the adventure begins.</p>
               </div>
             )}
             <ul className="list-none p-0 m-0 flex flex-col gap-3">
@@ -94,9 +94,9 @@ export function WordsScreen({ openImport, onImportHandled }: { openImport: boole
 function BackupNudge() {
   return (
     <div className="feedback near mb-3 flex items-center justify-between gap-2">
-      <span>Dags att spara en säkerhetskopia? (Inställningar → Säkerhetskopia)</span>
+      <span>Time to save a backup? (Settings → Backup)</span>
       <button type="button" className="btn btn-soft" style={{ minHeight: 44, padding: '0.3rem 0.9rem' }} onClick={() => void updateSettings(db, { listsSinceBackup: 0 })}>
-        Senare
+        Later
       </button>
     </div>
   );
@@ -118,13 +118,13 @@ function ListCard({ list, words, progress, now, current, onOpen }: { list: Vocab
   const { c, due } = counts(words, progress, now);
   const total = words.length || 1;
   return (
-    <button type="button" onClick={onOpen} className="card w-full text-left block border-0" style={{ cursor: 'pointer' }} aria-label={`${list.name}, ${words.length} glosor`}>
+    <button type="button" onClick={onOpen} className="card w-full text-left block border-0" style={{ cursor: 'pointer' }} aria-label={`${list.name}, ${words.length} words`}>
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 className="h2">{list.name}</h2>
-          <p className="text-sm font-bold muted">{words.length} glosor · {new Date(list.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}</p>
+          <p className="text-sm font-bold muted">{words.length} words · {new Date(list.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</p>
         </div>
-        {current && <span className="status st-MASTERED">Aktuell</span>}
+        {current && <span className="status st-MASTERED">Current</span>}
       </div>
       <div className="segbar mt-3" aria-hidden="true">
         {(['MASTERED', 'REVIEW', 'RELEARNING', 'LEARNING', 'NEW'] as WordState[]).map((s) => (
@@ -132,7 +132,7 @@ function ListCard({ list, words, progress, now, current, onOpen }: { list: Vocab
         ))}
       </div>
       <p className="text-sm font-extrabold mt-2">
-        {c.MASTERED} kan · {c.NEW} nya{due > 0 ? ` · ${due} att repetera` : ''}
+        {c.MASTERED} known · {c.NEW} new{due > 0 ? ` · ${due} to review` : ''}
       </p>
     </button>
   );
@@ -144,24 +144,24 @@ function ListDetail({ list, words, progress, now, onBack, onAdd }: { list?: Voca
   const [confirmDelete, setConfirmDelete] = useState(false);
   const sorted = useMemo(() => [...words].sort((a, b) => a.position - b.position), [words]);
   if (!list) {
-    return <button type="button" className="btn btn-soft" onClick={onBack}>Tillbaka</button>;
+    return <button type="button" className="btn btn-soft" onClick={onBack}>Back</button>;
   }
   const { due } = counts(words, progress, now);
 
   return (
     <>
       <div className="flex items-center gap-2 mb-3">
-        <button type="button" className="icon-btn" onClick={onBack} aria-label="Tillbaka"><BackIcon width="24" height="24" /></button>
+        <button type="button" className="icon-btn" onClick={onBack} aria-label="Back"><BackIcon width="24" height="24" /></button>
         <h1 className="h1 flex-1">{list.name}</h1>
-        <button type="button" className="btn btn-soft" style={{ minHeight: 44, padding: '0.3rem 1rem' }} onClick={() => setRenaming(true)}>Ändra</button>
+        <button type="button" className="btn btn-soft" style={{ minHeight: 44, padding: '0.3rem 1rem' }} onClick={() => setRenaming(true)}>Edit</button>
       </div>
-      <p className="font-extrabold muted mb-3">{words.length} glosor{due > 0 ? ` · ${due} att repetera` : ''}</p>
+      <p className="font-extrabold muted mb-3">{words.length} words{due > 0 ? ` · ${due} to review` : ''}</p>
       <ul className="list-none p-0 m-0 flex flex-col gap-2">
         {sorted.map((w) => {
           const st = progress.get(w.id)?.state ?? 'NEW';
           return (
             <li key={w.id}>
-              <button type="button" className="card w-full text-left border-0 flex items-center justify-between gap-2" style={{ padding: '0.7rem 1rem', cursor: 'pointer', minHeight: 56 }} onClick={() => setEditing(w)} aria-label={`Redigera ${w.sv} – ${w.en}`}>
+              <button type="button" className="card w-full text-left border-0 flex items-center justify-between gap-2" style={{ padding: '0.7rem 1rem', cursor: 'pointer', minHeight: 56 }} onClick={() => setEditing(w)} aria-label={`Edit ${w.sv} – ${w.en}`}>
                 <span>
                   <span className="font-extrabold">{w.sv}</span> <span className="muted">→</span>{' '}
                   <span lang="en" className="font-extrabold" style={{ color: 'var(--color-lav-d)' }}>{joinAlternatives(w.en, w.alts)}</span>
@@ -173,20 +173,20 @@ function ListDetail({ list, words, progress, now, onBack, onAdd }: { list?: Voca
         })}
       </ul>
       <div className="flex gap-2 mt-4">
-        <button type="button" className="btn btn-primary flex-1" onClick={onAdd}><PlusIcon width="22" height="22" /> Fler glosor</button>
-        <button type="button" className="btn btn-danger" onClick={() => setConfirmDelete(true)} aria-label="Ta bort listan"><TrashIcon width="22" height="22" /></button>
+        <button type="button" className="btn btn-primary flex-1" onClick={onAdd}><PlusIcon width="22" height="22" /> More words</button>
+        <button type="button" className="btn btn-danger" onClick={() => setConfirmDelete(true)} aria-label="Delete the list"><TrashIcon width="22" height="22" /></button>
       </div>
 
       {editing && <EditWord word={editing} onClose={() => setEditing(null)} />}
       {renaming && <RenameList list={list} onClose={() => setRenaming(false)} />}
       {confirmDelete && (
         <div className="sheet-back" style={{ alignItems: 'center' }} role="presentation">
-          <div className="card m-4 max-w-sm" role="alertdialog" aria-modal="true" aria-label="Ta bort lista">
-            <h2 className="h2 mb-2">Ta bort "{list.name}"?</h2>
-            <p className="font-bold mb-3">Alla {words.length} glosor i listan och deras träningshistorik tas bort. Dina figurer och poäng behålls.</p>
+          <div className="card m-4 max-w-sm" role="alertdialog" aria-modal="true" aria-label="Delete list">
+            <h2 className="h2 mb-2">Delete "{list.name}"?</h2>
+            <p className="font-bold mb-3">All {words.length} words in the list and their practice history will be deleted. Your family and points are kept.</p>
             <div className="flex gap-2">
-              <button type="button" className="btn btn-danger flex-1" onClick={async () => { await deleteList(db, list.id); onBack(); }}>Ta bort</button>
-              <button type="button" className="btn btn-soft flex-1" onClick={() => setConfirmDelete(false)} autoFocus>Behåll</button>
+              <button type="button" className="btn btn-danger flex-1" onClick={async () => { await deleteList(db, list.id); onBack(); }}>Delete</button>
+              <button type="button" className="btn btn-soft flex-1" onClick={() => setConfirmDelete(false)} autoFocus>Keep</button>
             </div>
           </div>
         </div>
@@ -204,7 +204,7 @@ function RenameList({ list, onClose }: { list: VocabularyList; onClose: () => vo
         className="sheet flex flex-col gap-3"
         role="dialog"
         aria-modal="true"
-        aria-label="Ändra lista"
+        aria-label="Edit list"
         onClick={(e) => e.stopPropagation()}
         onSubmit={async (e) => {
           e.preventDefault();
@@ -212,10 +212,10 @@ function RenameList({ list, onClose }: { list: VocabularyList; onClose: () => vo
           onClose();
         }}
       >
-        <h2 className="h1">Ändra lista</h2>
-        <div><label className="label" htmlFor="rn">Namn</label><input id="rn" className="field" value={name} onChange={(e) => setName(e.target.value)} /></div>
-        <div><label className="label" htmlFor="rw">Vecka / nummer</label><input id="rw" className="field" inputMode="numeric" value={week} onChange={(e) => setWeek(e.target.value.replace(/\D/g, '').slice(0, 3))} /></div>
-        <div className="flex gap-2"><button type="submit" className="btn btn-primary flex-1">Spara</button><button type="button" className="btn btn-soft" onClick={onClose}>Avbryt</button></div>
+        <h2 className="h1">Edit list</h2>
+        <div><label className="label" htmlFor="rn">Name</label><input id="rn" className="field" value={name} onChange={(e) => setName(e.target.value)} /></div>
+        <div><label className="label" htmlFor="rw">Week / number</label><input id="rw" className="field" inputMode="numeric" value={week} onChange={(e) => setWeek(e.target.value.replace(/\D/g, '').slice(0, 3))} /></div>
+        <div className="flex gap-2"><button type="submit" className="btn btn-primary flex-1">Save</button><button type="button" className="btn btn-soft" onClick={onClose}>Cancel</button></div>
       </form>
     </div>
   );
@@ -240,24 +240,24 @@ function EditWord({ word, onClose }: { word: Word; onClose: () => void }) {
   };
   return (
     <div className="sheet-back" onClick={onClose} role="presentation">
-      <form className="sheet flex flex-col gap-3" role="dialog" aria-modal="true" aria-label="Redigera glosa" onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); void save(); }}>
-        <h2 className="h1">Redigera glosa</h2>
-        <div><label className="label" htmlFor="ew-sv">Svenska</label><input id="ew-sv" className="field" value={sv} onChange={(e) => setSv(e.target.value)} autoCapitalize="none" autoCorrect="off" spellCheck={false} /></div>
+      <form className="sheet flex flex-col gap-3" role="dialog" aria-modal="true" aria-label="Edit word" onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); void save(); }}>
+        <h2 className="h1">Edit word</h2>
+        <div><label className="label" htmlFor="ew-sv">Swedish</label><input id="ew-sv" className="field" value={sv} onChange={(e) => setSv(e.target.value)} autoCapitalize="none" autoCorrect="off" spellCheck={false} /></div>
         <div>
-          <label className="label" htmlFor="ew-en">Engelska (flera rätta svar: skilj med /)</label>
+          <label className="label" htmlFor="ew-en">English (several correct answers: separate with /)</label>
           <input id="ew-en" lang="en" className="field" value={en} onChange={(e) => setEn(e.target.value)} autoCapitalize="none" autoCorrect="off" spellCheck={false} />
         </div>
         <div>
-          <label className="label" htmlFor="ew-ex">Exempelmening på engelska (valfri, till luckövningen)</label>
-          <input id="ew-ex" lang="en" className="field" value={example} onChange={(e) => setExample(e.target.value)} placeholder={builtIn ?? `t.ex. I like my ${parsed.main || 'word'}.`} autoCapitalize="sentences" autoCorrect="off" spellCheck={false} />
-          <p className="text-xs font-bold muted mt-1">Meningen måste innehålla ordet. Tom ruta = {builtIn ? 'appens egen mening används' : 'ingen luckövning för det här ordet'}.</p>
+          <label className="label" htmlFor="ew-ex">Example sentence in English (optional, for the fill-in-the-blank exercise)</label>
+          <input id="ew-ex" lang="en" className="field" value={example} onChange={(e) => setExample(e.target.value)} placeholder={builtIn ?? `e.g. I like my ${parsed.main || 'word'}.`} autoCapitalize="sentences" autoCorrect="off" spellCheck={false} />
+          <p className="text-xs font-bold muted mt-1">The sentence must contain the word. Empty = {builtIn ? 'the app’s own sentence is used' : 'no fill-in-the-blank exercise for this word'}.</p>
         </div>
-        {willReset && <p className="feedback near text-sm">Ordet får en ny betydelse, så träningen av just den här glosan börjar om.</p>}
+        {willReset && <p className="feedback near text-sm">The word gets a new meaning, so practice for this word starts over.</p>}
         {error && <p role="alert" className="feedback miss">{error}</p>}
         <div className="flex gap-2">
-          <button type="submit" className="btn btn-primary flex-1">Spara</button>
-          <button type="button" className="btn btn-danger" aria-label="Ta bort glosan" onClick={async () => { await deleteWord(db, word.id); onClose(); }}><TrashIcon width="22" height="22" /></button>
-          <button type="button" className="btn btn-soft" onClick={onClose}>Avbryt</button>
+          <button type="submit" className="btn btn-primary flex-1">Save</button>
+          <button type="button" className="btn btn-danger" aria-label="Delete the word" onClick={async () => { await deleteWord(db, word.id); onClose(); }}><TrashIcon width="22" height="22" /></button>
+          <button type="button" className="btn btn-soft" onClick={onClose}>Cancel</button>
         </div>
       </form>
     </div>

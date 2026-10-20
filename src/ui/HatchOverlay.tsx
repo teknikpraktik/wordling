@@ -39,17 +39,17 @@ export function HatchOverlay({ onClose, first }: { onClose: () => void; first?: 
   const info = result ? speciesInfo(result.creature.species) : null;
 
   return (
-    <div className="overlay hatch-bg" role="dialog" aria-modal="true" aria-label="Kläck ägg">
+    <div className="overlay hatch-bg" role="dialog" aria-modal="true" aria-label="Hatch egg">
       <div className="inner items-center justify-center text-center px-6" style={{ paddingTop: 'var(--safe-top)' }}>
         {phase !== 'reveal' && (
           <>
-            <h1 className="h1 mb-1">{first ? 'Välkommen till Wordling!' : 'Ett nytt ägg!'}</h1>
-            <p className="muted mb-6 font-bold">{phase === 'egg' ? 'Tryck på ägget så kläcks det.' : 'Något händer…'}</p>
+            <h1 className="h1 mb-1">{first ? 'Welcome to Wordling!' : 'A new egg!'}</h1>
+            <p className="muted mb-6 font-bold">{phase === 'egg' ? 'Tap the egg to hatch it.' : 'Something is happening…'}</p>
             <button
               type="button"
               onClick={crack}
               disabled={phase !== 'egg'}
-              aria-label="Kläck ägget"
+              aria-label="Hatch the egg"
               className="block w-64 h-64 bg-transparent border-0 p-0"
             >
               <EggArt color={color} crack={phase === 'shake' ? 2 : 0} className={phase === 'shake' ? 'shake' : ''} />
@@ -70,7 +70,7 @@ export function HatchOverlay({ onClose, first }: { onClose: () => void; first?: 
                   }}
                 />
               ))}
-            <p className="font-extrabold muted">{result.isNew ? 'Du fick en ny vän!' : 'Din vän fick en ny färg!'}</p>
+            <p className="font-extrabold muted">{result.isNew ? 'You got a new friend!' : 'Your friend got a new colour!'}</p>
             <div className="reveal w-72 h-72">
               <CreatureArt
                 species={result.creature.species}
@@ -83,7 +83,7 @@ export function HatchOverlay({ onClose, first }: { onClose: () => void; first?: 
             <h1 className="h1">{info.name}</h1>
             <p className="muted font-bold mb-5 max-w-xs">{info.trait}</p>
             <button type="button" className="btn btn-primary btn-big" onClick={onClose} autoFocus>
-              Hej, {info.name}!
+              Hello, {info.name}!
             </button>
           </>
         )}

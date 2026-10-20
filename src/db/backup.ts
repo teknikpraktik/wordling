@@ -59,28 +59,28 @@ export interface Validation {
 /** Strict structural validation. Nothing touches the database until this returns ok. */
 export function validateBackup(input: unknown): Validation {
   const errors: string[] = [];
-  if (typeof input !== 'object' || input === null) return { ok: false, errors: ['Filen är inte en Wordling-backup.'] };
+  if (typeof input !== 'object' || input === null) return { ok: false, errors: ['The file is not a Wordling backup.'] };
   const b = input as Partial<Backup>;
-  if (b.format !== BACKUP_FORMAT) return { ok: false, errors: ['Filen är inte en Wordling-backup.'] };
+  if (b.format !== BACKUP_FORMAT) return { ok: false, errors: ['The file is not a Wordling backup.'] };
   if (typeof b.version !== 'number' || b.version > BACKUP_VERSION || b.version < 1) {
-    return { ok: false, errors: [`Backupens version (${String(b.version)}) stöds inte av den här appen.`] };
+    return { ok: false, errors: [`The backup version (${String(b.version)}) is not supported by this app.`] };
   }
-  if (typeof b.data !== 'object' || b.data === null) return { ok: false, errors: ['Backupen saknar data.'] };
+  if (typeof b.data !== 'object' || b.data === null) return { ok: false, errors: ['The backup has no data.'] };
 
   const data = b.data as Record<string, unknown>;
   for (const t of TABLES) {
     const rows = data[t];
     if (!Array.isArray(rows)) {
-      errors.push(`Tabellen ${t} saknas.`);
+      errors.push(`Table ${t} is missing.`);
       continue;
     }
     const seen = new Set<unknown>();
     rows.forEach((row, i) => {
-      if (typeof row !== 'object' || row === null) return errors.push(`${t}[${i}] är ogiltig.`);
+      if (typeof row !== 'object' || row === null) return errors.push(`${t}[${i}] is invalid.`);
       const r = row as Record<string, unknown>;
-      if (!SCHEMA[t].every((check) => check(r))) errors.push(`${t}[${i}] har ogiltiga fält.`);
+      if (!SCHEMA[t].every((check) => check(r))) errors.push(`${t}[${i}] has invalid fields.`);
       const key = r[KEYS[t]];
-      if (seen.has(key)) errors.push(`${t}[${i}] har dubblerad nyckel.`);
+      if (seen.has(key)) errors.push(`${t}[${i}] has a duplicate key.`);
       seen.add(key);
     });
   }
@@ -90,15 +90,15 @@ export function validateBackup(input: unknown): Validation {
   const listIds = new Set(d.VocabularyLists.map((l) => l.id));
   const wordIds = new Set(d.Words.map((w) => w.id));
   d.Words.forEach((w, i) => {
-    if (!listIds.has(w.listId)) errors.push(`Words[${i}] hör till en lista som saknas.`);
+    if (!listIds.has(w.listId)) errors.push(`Words[${i}] belongs to a list that is missing.`);
   });
   d.WordProgress.forEach((p, i) => {
-    if (!wordIds.has(p.wordId)) errors.push(`WordProgress[${i}] hör till en glosa som saknas.`);
+    if (!wordIds.has(p.wordId)) errors.push(`WordProgress[${i}] belongs to a word that is missing.`);
   });
-  if (d.GameState.length > 1 || d.Settings.length > 1) errors.push('För många rader i GameState/Settings.');
+  if (d.GameState.length > 1 || d.Settings.length > 1) errors.push('Too many rows in GameState/Settings.');
   const creatureIds = new Set(d.OwnedCreatures.map((c) => c.id));
   const active = d.GameState[0]?.activeCreatureId;
-  if (active != null && !creatureIds.has(active)) errors.push('Aktiv figur finns inte i samlingen.');
+  if (active != null && !creatureIds.has(active)) errors.push('The active creature is not in the collection.');
   if (errors.length) return { ok: false, errors: errors.slice(0, 10) };
 
   return {
@@ -111,7 +111,7 @@ export function parseBackup(text: string): Validation {
   try {
     return validateBackup(JSON.parse(text));
   } catch {
-    return { ok: false, errors: ['Filen kunde inte läsas som JSON.'] };
+    return { ok: false, errors: ['The file could not be read as JSON.'] };
   }
 }
 
@@ -121,7 +121,7 @@ export function parseBackup(text: string): Validation {
  */
 export async function restoreBackup(db: WordlingDB, backup: unknown): Promise<void> {
   const v = validateBackup(backup);
-  if (!v.ok || !v.backup) throw new Error(v.errors[0] ?? 'Ogiltig backup');
+  if (!v.ok || !v.backup) throw new Error(v.errors[0] ?? 'Invalid backup');
   const data = v.backup.data;
   await db.transaction('rw', db.tables, async () => {
     for (const t of TABLES) await db.table(t).clear();

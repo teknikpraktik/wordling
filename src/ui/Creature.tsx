@@ -48,7 +48,7 @@ export function Creature({ creature, mood, fxKey, onPet, spontaneous = true, lab
   return (
     <div className="stage-wrap">
       {onPet ? (
-        <button type="button" className="pet-btn" onClick={onPet} aria-label={`Klappa ${label}`}>
+        <button type="button" className="pet-btn" onClick={onPet} aria-label={`Pet ${label}`}>
           {art}
         </button>
       ) : (

@@ -45,7 +45,7 @@ export function SilhouetteArt({ species, stage = 2, className = '' }: { species:
   const info = speciesInfo(species);
   const Art = SPECIES_ART[species];
   return (
-    <svg viewBox="0 0 200 200" role="img" aria-label="Okänd figur" className={`creature silhouette ${className}`}>
+    <svg viewBox="0 0 200 200" role="img" aria-label="Unknown creature" className={`creature silhouette ${className}`}>
       <g style={{ filter: 'brightness(0) opacity(0.16)' }}>
         <g transform={`translate(100 182) scale(${SCALE[stage]}) translate(-100 -182)`}>
           <Art pal={info.palette} stage={stage} mood="idle" />
@@ -57,7 +57,7 @@ export function SilhouetteArt({ species, stage = 2, className = '' }: { species:
 
 export function EggArt({ className = '', color = '#C9B6F2', crack = 0 }: { className?: string; color?: string; crack?: 0 | 1 | 2 }) {
   return (
-    <svg viewBox="0 0 200 200" role="img" aria-label="Ägg" className={`egg ${className}`}>
+    <svg viewBox="0 0 200 200" role="img" aria-label="Egg" className={`egg ${className}`}>
       <ellipse cx={100} cy={184} rx={44} ry={7} fill="#6B5B7B" opacity="0.14" />
       <g className="egg-body">
         <path d="M100 26 C146 26 168 90 168 128 C168 160 138 182 100 182 C62 182 32 160 32 128 C32 90 54 26 100 26 Z" fill={color} />

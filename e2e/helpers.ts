@@ -8,23 +8,23 @@ export const LIST_TEXT = Object.entries(PAIRS).map(([sv, en]) => `${sv} - ${en}`
 
 export async function firstStart(page: Page) {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Kläck ägget' }).click();
-  await page.getByRole('button', { name: /^Hej,/ }).click();
-  await expect(page.getByRole('button', { name: /^TRÄNA/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Hatch the egg' }).click();
+  await page.getByRole('button', { name: /^Hello,/ }).click();
+  await expect(page.getByRole('button', { name: /^TRAIN/ })).toBeVisible();
 }
 
 export async function importPasted(page: Page, text = LIST_TEXT, count = Object.keys(PAIRS).length) {
-  await page.getByRole('button', { name: 'Glosor', exact: true }).click();
-  await page.getByRole('button', { name: 'Lägg in glosor' }).click();
-  await page.getByLabel(/Ett ordpar per rad/).fill(text);
-  await page.getByRole('button', { name: 'Granska' }).click();
-  await page.getByRole('button', { name: new RegExp(`Spara ${count} glosor`) }).click();
-  await expect(page.getByRole('button', { name: 'Fler glosor' })).toBeVisible();
+  await page.getByRole('button', { name: 'Words', exact: true }).click();
+  await page.getByRole('button', { name: 'Add words' }).click();
+  await page.getByLabel(/One word pair per line/).fill(text);
+  await page.getByRole('button', { name: 'Preview' }).click();
+  await page.getByRole('button', { name: new RegExp(`Save ${count} words`) }).click();
+  await expect(page.getByRole('button', { name: 'More words' })).toBeVisible();
 }
 
 export async function startTraining(page: Page) {
-  await page.getByRole('button', { name: 'Träna', exact: true }).click();
-  await page.getByRole('button', { name: 'Starta' }).click();
+  await page.getByRole('button', { name: 'Train', exact: true }).click();
+  await page.getByRole('button', { name: 'Start' }).click();
   await expect(page.locator('.q-word')).toBeVisible();
 }
 
@@ -41,15 +41,15 @@ export async function answer(page: Page, wrong = false) {
       await page.locator('.choice', { hasText: new RegExp(`^\\s*${en}\\s*$`) }).click();
     }
   } else {
-    await page.getByLabel('Ditt svar på engelska').fill(wrong ? 'zzzzzz' : en);
-    await page.getByRole('button', { name: 'Svara' }).click();
+    await page.getByLabel('Your answer in English').fill(wrong ? 'zzzzzz' : en);
+    await page.getByRole('button', { name: 'Answer' }).click();
   }
   await expect(page.locator('.feedback')).toBeVisible();
   return { sv, en };
 }
 
 export async function nextQuestion(page: Page) {
-  await page.getByRole('button', { name: /^(Nästa|Klar)$/ }).click();
+  await page.getByRole('button', { name: /^(Next|Done)$/ }).click();
   // wait for the next question (or the summary) to replace the feedback
   await expect(page.locator('.feedback[role="status"]')).toHaveCount(0);
 }
@@ -63,11 +63,11 @@ export async function runSession(page: Page, opts: { wrongFirst?: boolean } = {}
     n++;
     await nextQuestion(page);
     // the previous answer must never linger in the input field
-    const input = page.getByLabel('Ditt svar på engelska');
+    const input = page.getByLabel('Your answer in English');
     if (await input.count()) await expect(input).toHaveValue('');
-    if (await page.getByRole('heading', { name: 'Bra jobbat!' }).isVisible()) break;
+    if (await page.getByRole('heading', { name: 'Well done!' }).isVisible()) break;
   }
-  await expect(page.getByRole('heading', { name: 'Bra jobbat!' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Well done!' })).toBeVisible();
   return n;
 }
 

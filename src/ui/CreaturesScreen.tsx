@@ -9,7 +9,7 @@ import { EggIcon } from './Icons';
 import { GrowthTrack } from './GrowthTrack';
 import { useCreatures, useGame, usePendingEggs } from './hooks';
 
-const STAGE = { 1: 'Bebis', 2: 'Växande', 3: 'Fullt utvecklad' } as const;
+const STAGE = { 1: 'Baby', 2: 'Growing', 3: 'Fully grown' } as const;
 
 export function CreaturesScreen({ onHatch }: { onHatch: () => void }) {
   const creatures = useCreatures();
@@ -22,12 +22,12 @@ export function CreaturesScreen({ onHatch }: { onHatch: () => void }) {
 
   return (
     <div className="screen">
-      <h1 className="h1 mb-1">Mina figurer</h1>
-      <p className="muted font-bold mb-4">{creatures.length} av {SPECIES.length} hittade</p>
+      <h1 className="h1 mb-1">My family</h1>
+      <p className="muted font-bold mb-4">{creatures.length} of {SPECIES.length} found</p>
 
       {eggs > 0 && (
         <button type="button" className="btn btn-peach w-full mb-4" onClick={onHatch}>
-          <EggIcon width="26" height="26" /> Nytt ägg! Kläck det
+          <EggIcon width="26" height="26" /> New egg! Hatch it
         </button>
       )}
 
@@ -36,17 +36,17 @@ export function CreaturesScreen({ onHatch }: { onHatch: () => void }) {
           const c = owned.get(sp.id);
           if (!c) {
             return (
-              <div key={sp.id} className="cc" style={{ cursor: 'default' }} aria-label="Ännu inte hittad figur">
+              <div key={sp.id} className="cc" style={{ cursor: 'default' }} aria-label="Creature not found yet">
                 <div className="art"><SilhouetteArt species={sp.id} /></div>
                 <span className="font-extrabold muted">???</span>
-                <span className="text-xs font-bold muted">Dold figur</span>
+                <span className="text-xs font-bold muted">Hidden</span>
               </div>
             );
           }
           const active = game.activeCreatureId === c.id;
           return (
-            <button key={sp.id} type="button" className={`cc ${active ? 'active' : ''}`} onClick={() => setDetail(c)} aria-label={`${sp.name}, ${STAGE[c.stage]}${active ? ', din kompis just nu' : ''}`}>
-              {active && <span className="badge">Kompis</span>}
+            <button key={sp.id} type="button" className={`cc ${active ? 'active' : ''}`} onClick={() => setDetail(c)} aria-label={`${sp.name}, ${STAGE[c.stage]}${active ? ', your buddy right now' : ''}`}>
+              {active && <span className="badge">Buddy</span>}
               <div className="art"><CreatureArt species={c.species} stage={c.stage} variant={c.variant} noShadow label={sp.name} /></div>
               <span className="font-black text-lg">{sp.name}</span>
               <span className="text-xs font-extrabold muted">{STAGE[c.stage]} · {c.xp} XP</span>
@@ -59,7 +59,7 @@ export function CreaturesScreen({ onHatch }: { onHatch: () => void }) {
         <div className="card mt-5 flex items-center gap-3">
           <div className="w-14 h-14 shrink-0"><EggArt color="#E9E0FB" /></div>
           <p className="font-bold">
-            {game.totalXp >= nextAt ? 'Ett ägg väntar!' : `Nästa ägg kommer vid ${nextAt} poäng. Du har ${game.totalXp}.`}
+            {game.totalXp >= nextAt ? 'An egg is waiting!' : `The next egg comes at ${nextAt} points. You have ${game.totalXp}.`}
           </p>
         </div>
       )}
@@ -86,9 +86,9 @@ function Detail({ creature, active, onClose }: { creature: OwnedCreature; active
         <div className="mt-3"><GrowthTrack creature={creature} /></div>
         <div className="flex gap-3 mt-4">
           <button type="button" className="btn btn-primary flex-1" onClick={choose} disabled={active}>
-            {active ? 'Din kompis just nu' : `Välj ${info.name}`}
+            {active ? 'Your buddy right now' : `Choose ${info.name}`}
           </button>
-          <button type="button" className="btn btn-soft" onClick={onClose}>Stäng</button>
+          <button type="button" className="btn btn-soft" onClick={onClose}>Close</button>
         </div>
       </div>
     </div>

@@ -14,18 +14,18 @@ test('main screens have no WCAG A/AA violations (axe)', async ({ page }) => {
   await scan(page, 'home');
   await importPasted(page);
   await scan(page, 'list');
-  await page.getByRole('button', { name: 'Träna', exact: true }).click();
+  await page.getByRole('button', { name: 'Train', exact: true }).click();
   await scan(page, 'train idle');
-  await page.getByRole('button', { name: 'Starta' }).click();
+  await page.getByRole('button', { name: 'Start' }).click();
   await scan(page, 'question');
   await page.locator('.choice').first().click();
   await page.waitForTimeout(1200); // let the fade-in finish so contrast is measured on final colours
   await scan(page, 'feedback');
-  await page.getByRole('button', { name: 'Spara och sluta för nu' }).click();
-  await page.getByRole('button', { name: 'Figurer', exact: true }).click();
+  await page.getByRole('button', { name: 'Save and stop for now' }).click();
+  await page.getByRole('button', { name: 'Family', exact: true }).click();
   await scan(page, 'creatures');
-  await page.getByRole('button', { name: 'Hem' }).click();
-  await page.getByRole('button', { name: 'Inställningar' }).click();
+  await page.getByRole('button', { name: 'Home' }).click();
+  await page.getByRole('button', { name: 'Settings' }).click();
   await scan(page, 'settings');
 });
 

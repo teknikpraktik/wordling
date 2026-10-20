@@ -92,7 +92,7 @@ export async function createList(db: WordlingDB, input: ListInput, words: WordIn
   const now = clock(env);
   const list: VocabularyList = {
     id: uuid(),
-    name: input.name.trim() || 'Ny lista',
+    name: input.name.trim() || 'New list',
     weekNumber: input.weekNumber,
     date: input.date ?? localDate(now),
     createdAt: now.toISOString(),
@@ -143,9 +143,9 @@ export async function updateWord(db: WordlingDB, wordId: string, input: WordInpu
   const now = clock(env).toISOString();
   return db.transaction('rw', [db.words, db.progress], async () => {
     const old = await db.words.get(wordId);
-    if (!old) throw new Error('Glosan finns inte');
+    if (!old) throw new Error('The word does not exist');
     const c = cleanInput(input);
-    if (!c.sv || !c.en) throw new Error('Både svenskt och engelskt ord krävs');
+    if (!c.sv || !c.en) throw new Error('Both a Swedish and an English word are required');
     const reset = isSubstantialChange(old.sv, c.sv) || isSubstantialChange(old.en, c.en);
     const { example: _drop, ...oldRest } = old;
     void _drop;
@@ -329,14 +329,14 @@ export async function submitAnswer(
     [db.sessions, db.words, db.progress, db.reviews, db.rewards, db.game, db.creatures],
     async () => {
       const session = await db.sessions.get(sessionId);
-      if (!session || session.status !== 'active') throw new Error('Passet är inte aktivt');
+      if (!session || session.status !== 'active') throw new Error('The session is not active');
       const stored = session.answers[qid];
       if (stored) return { result: stored, session };
       const item = session.queue[session.index];
-      if (!item || item.qid !== qid) throw new Error('Frågan är inte aktuell');
+      if (!item || item.qid !== qid) throw new Error('This question is not current');
 
       const word = await db.words.get(item.wordId);
-      if (!word) throw new Error('Glosan finns inte längre');
+      if (!word) throw new Error('The word no longer exists');
       const game = (await db.game.get('main'))!;
       const now = effectiveNow(clock(env), game.lastSeenAt);
       const prev = (await db.progress.get(word.id)) ?? newProgress(word.id);
@@ -415,7 +415,7 @@ export async function advanceSession(db: WordlingDB, sessionId: string, qid: str
     [db.sessions, db.words, db.rewards, db.game, db.creatures],
     async () => {
       const session = await db.sessions.get(sessionId);
-      if (!session) throw new Error('Passet finns inte');
+      if (!session) throw new Error('The session does not exist');
       if (session.status === 'done') return session;
       const cur = session.queue[session.index];
       if (!cur || cur.qid !== qid || !session.answers[qid]) return session; // already advanced or not answered

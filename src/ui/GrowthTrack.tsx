@@ -2,7 +2,7 @@ import { STAGE_EVOLVED_XP, STAGE_GROWING_XP, speciesInfo, xpToNextStage } from '
 import type { OwnedCreature, Stage } from '../domain/types';
 import { CreatureArt, SilhouetteArt } from './creatures/CreatureArt';
 
-const NAMES: Record<Stage, string> = { 1: 'Bebis', 2: 'Växande', 3: 'Fullvuxen' };
+const NAMES: Record<Stage, string> = { 1: 'Baby', 2: 'Growing', 3: 'Grown-up' };
 const AT: Record<Stage, number> = { 1: 0, 2: (STAGE_GROWING_XP / STAGE_EVOLVED_XP) * 100, 3: 100 };
 // Art gets bigger with every stage, so the size of the creature can be read off the track.
 const SIZE = { compact: { 1: 30, 2: 40, 3: 52 }, full: { 1: 64, 2: 84, 3: 108 } } as const;
@@ -18,8 +18,8 @@ export function GrowthTrack({ creature, compact = false }: { creature: OwnedCrea
   const sizes = SIZE[compact ? 'compact' : 'full'];
   const stages: Stage[] = [1, 2, 3];
   const text = next
-    ? `${creature.xp} XP · ${next.remaining} kvar till ${NAMES[next.next]}`
-    : `${creature.xp} XP · Fullt utvecklad!`;
+    ? `${creature.xp} XP · ${next.remaining} to go until ${NAMES[next.next]}`
+    : `${creature.xp} XP · Fully grown!`;
 
   return (
     <div
@@ -28,8 +28,8 @@ export function GrowthTrack({ creature, compact = false }: { creature: OwnedCrea
       aria-valuemin={0}
       aria-valuemax={STAGE_EVOLVED_XP}
       aria-valuenow={Math.min(creature.xp, STAGE_EVOLVED_XP)}
-      aria-valuetext={`${creature.xp} av ${STAGE_EVOLVED_XP} XP. Nu: ${NAMES[creature.stage]}`}
-      aria-label={`Hur stor ${info.name} har vuxit`}
+      aria-valuetext={`${creature.xp} of ${STAGE_EVOLVED_XP} XP. Now: ${NAMES[creature.stage]}`}
+      aria-label={`How much ${info.name} has grown`}
     >
       <div className="growth-art" style={{ height: sizes[3] + 4 }}>
         {stages.map((st) => {

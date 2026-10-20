@@ -49,7 +49,7 @@ export function HomeScreen({ onTrain, onSettings, onHatch, onCollection, backupD
 
   const pet = () => {
     playSfx('pet');
-    show('pet', 1000, `${info.name} blir klappad`);
+    show('pet', 1000, `${info.name} is being petted`);
   };
   /**
    * Feeding is instant: every tap spawns its own falling berry straight away and the animations simply
@@ -63,7 +63,7 @@ export function HomeScreen({ onTrain, onSettings, onHatch, onCollection, backupD
     window.setTimeout(() => setDrops((d) => d.filter((x) => x.id !== id)), 1500);
     window.clearTimeout(timer.current);
     setMood('eat');
-    setAnnounce(`${info.name} äter och växer`);
+    setAnnounce(`${info.name} is eating and growing`);
     timer.current = window.setTimeout(() => setMood('idle'), 1200);
     playSfx('feed');
     try {
@@ -73,7 +73,7 @@ export function HomeScreen({ onTrain, onSettings, onHatch, onCollection, backupD
       } else if (fed.evolved) {
         window.setTimeout(() => {
           playSfx('evolve');
-          show('play', 2200, `${info.name} har utvecklats!`);
+          show('play', 2200, `${info.name} has evolved!`);
           setEvolved(true);
           window.setTimeout(() => setEvolved(false), 3500);
         }, 700);
@@ -84,21 +84,21 @@ export function HomeScreen({ onTrain, onSettings, onHatch, onCollection, backupD
   };
   const play = () => {
     playSfx('reward');
-    show('play', 1900, `${info.name} leker`);
+    show('play', 1900, `${info.name} is playing`);
   };
   const sleepToggle = () => {
     window.clearTimeout(timer.current);
     if (mood === 'sleep') {
       setMood('idle');
-      setAnnounce(`${info.name} vaknar`);
+      setAnnounce(`${info.name} wakes up`);
     } else {
       setMood('sleep');
-      setAnnounce(`${info.name} sover`);
+      setAnnounce(`${info.name} is sleeping`);
     }
   };
 
   const status =
-    wordCount === 0 ? 'Lägg in veckans glosor för att börja' : ready > 0 ? `${ready} ${ready === 1 ? 'glosa' : 'glosor'} redo` : 'Allt klart för idag';
+    wordCount === 0 ? 'Add this week’s words to get started' : ready > 0 ? `${ready} ${ready === 1 ? 'word' : 'words'} ready` : 'All done for today';
 
   return (
     <div className="home">
@@ -106,20 +106,20 @@ export function HomeScreen({ onTrain, onSettings, onHatch, onCollection, backupD
         <HomeScene />
       </div>
       <div className="home-top">
-        <span className="chip" aria-label={`Mat: ${game.food}`}>
+        <span className="chip" aria-label={`Food: ${game.food}`}>
           <BerryIcon width="22" height="22" style={{ color: '#d6456b' }} />
           <span>{game.food}</span>
         </span>
         {eggs > 0 && (
-          <button type="button" className="chip egg-chip" onClick={onHatch} aria-label="Nytt ägg! Kläck det">
-            <EggIcon width="20" height="20" /> Nytt ägg!
+          <button type="button" className="chip egg-chip" onClick={onHatch} aria-label="New egg! Hatch it">
+            <EggIcon width="20" height="20" /> New egg!
           </button>
         )}
         <div className="flex gap-2">
-          <button type="button" className="icon-btn" onClick={onCollection} aria-label="Mina figurer">
+          <button type="button" className="icon-btn" onClick={onCollection} aria-label="My family">
             <PawIcon width="26" height="26" />
           </button>
-          <button type="button" className="icon-btn relative" onClick={onSettings} aria-label="Inställningar">
+          <button type="button" className="icon-btn relative" onClick={onSettings} aria-label="Settings">
             <GearIcon width="26" height="26" />
             {backupDue && <span className="absolute top-2 right-2 w-3 h-3 rounded-full bg-peach-d" aria-hidden="true" />}
           </button>
@@ -136,7 +136,7 @@ export function HomeScreen({ onTrain, onSettings, onHatch, onCollection, backupD
         </div>
         {evolved && (
           <p className="chip" style={{ background: 'var(--color-mint)', color: '#0f4d38' }} role="status">
-            {info.name} har utvecklats!
+            {info.name} has evolved!
           </p>
         )}
         <p className="sr-only" aria-live="polite">{announce}</p>
@@ -144,21 +144,21 @@ export function HomeScreen({ onTrain, onSettings, onHatch, onCollection, backupD
 
       <div className="home-bottom">
         <div className="action-row">
-          <button type="button" className="action" onClick={feed} disabled={game.food < 1} aria-label="Mata">
+          <button type="button" className="action" onClick={feed} disabled={game.food < 1} aria-label="Feed">
             <BerryIcon style={{ color: '#d6456b' }} />
-            Mata
+            Feed
           </button>
-          <button type="button" className="action" onClick={play} aria-label="Leka">
+          <button type="button" className="action" onClick={play} aria-label="Play">
             <BallIcon style={{ color: 'var(--color-peach-d)' }} />
-            Leka
+            Play
           </button>
-          <button type="button" className="action" onClick={sleepToggle} aria-pressed={mood === 'sleep'} aria-label="Sov">
+          <button type="button" className="action" onClick={sleepToggle} aria-pressed={mood === 'sleep'} aria-label="Sleep">
             <MoonIcon style={{ color: 'var(--color-lav-d)' }} />
-            Sov
+            Sleep
           </button>
         </div>
         <button type="button" className="btn btn-primary btn-big w-full train-btn" onClick={onTrain}>
-          <span>{hasActive ? 'FORTSÄTT' : 'TRÄNA'}</span>
+          <span>{hasActive ? 'CONTINUE' : 'TRAIN'}</span>
           <small>{status}</small>
         </button>
       </div>

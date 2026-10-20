@@ -47,7 +47,7 @@ function Idle({ onExit, onImport }: { onExit: () => void; onImport: () => void; 
   return (
     <div className="train items-center text-center">
       <div className="w-full flex justify-start">
-        <button type="button" className="icon-btn" onClick={onExit} aria-label="Tillbaka"><CloseIcon width="24" height="24" /></button>
+        <button type="button" className="icon-btn" onClick={onExit} aria-label="Back"><CloseIcon width="24" height="24" /></button>
       </div>
       <div className="flex-1 flex flex-col items-center justify-center gap-3">
         {creature && (
@@ -57,28 +57,28 @@ function Idle({ onExit, onImport }: { onExit: () => void; onImport: () => void; 
         )}
         {wordCount === 0 ? (
           <>
-            <h1 className="h1">Inga glosor än</h1>
-            <p className="muted font-bold">Lägg in veckans glosor så kan vi börja.</p>
-            <button type="button" className="btn btn-primary" onClick={onImport}>Lägg in glosor</button>
+            <h1 className="h1">No words yet</h1>
+            <p className="muted font-bold">Add this week’s words and we can start.</p>
+            <button type="button" className="btn btn-primary" onClick={onImport}>Add words</button>
           </>
         ) : ready > 0 ? (
           <>
-            <h1 className="h1">Redo att träna?</h1>
-            <p className="muted font-bold">Ett pass tar några minuter.</p>
-            <button type="button" className="btn btn-primary btn-big" onClick={() => begin(false)} disabled={busy}>Starta</button>
+            <h1 className="h1">Ready to train?</h1>
+            <p className="muted font-bold">A round takes a few minutes.</p>
+            <button type="button" className="btn btn-primary btn-big" onClick={() => begin(false)} disabled={busy}>Start</button>
           </>
         ) : (
           <>
-            <h1 className="h1">Allt klart för idag!</h1>
-            <p className="muted font-bold max-w-xs">Nya glosor kommer tillbaka när det är dags att repetera dem.</p>
+            <h1 className="h1">All done for today!</h1>
+            <p className="muted font-bold max-w-xs">Words come back when it is time to review them.</p>
             {started > 0 && (
               <button type="button" className="btn btn-soft mt-2" onClick={() => begin(true)} disabled={busy}>
-                Öva extra (ger inga belöningar)
+                Extra practice (no rewards)
               </button>
             )}
           </>
         )}
-        {empty && <p className="font-bold muted" role="status">Det finns inget att öva just nu.</p>}
+        {empty && <p className="font-bold muted" role="status">There is nothing to practise right now.</p>}
       </div>
     </div>
   );
@@ -134,17 +134,17 @@ function QuestionView({ session, onExit, onFinished }: { session: Session; onExi
   return (
     <div className="train">
       <div className="flex items-center gap-3">
-        <button type="button" className="icon-btn" onClick={onExit} aria-label="Spara och sluta för nu"><CloseIcon width="24" height="24" /></button>
-        <div className="progress" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Framsteg">
+        <button type="button" className="icon-btn" onClick={onExit} aria-label="Save and stop for now"><CloseIcon width="24" height="24" /></button>
+        <div className="progress" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Progress">
           <i style={{ width: `${pct}%` }} />
         </div>
-        <span className="text-sm font-extrabold muted" aria-label={`Fråga ${session.index + 1} av ${total}`}>{session.index + 1}/{total}</span>
+        <span className="text-sm font-extrabold muted" aria-label={`Question ${session.index + 1} of ${total}`}>{session.index + 1}/{total}</span>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto pt-4 pb-2 flex flex-col gap-3">
         <div>
           <p className="muted font-extrabold">
-            {item.mode === 'choice' ? 'Vad heter det på engelska?' : item.mode === 'cloze' ? 'Vilket engelskt ord saknas i meningen?' : 'Skriv på engelska'}
+            {item.mode === 'choice' ? 'What is it in English?' : item.mode === 'cloze' ? 'Which English word is missing from the sentence?' : 'Write it in English'}
           </p>
           <h1 className="q-word" lang="sv">{word.sv}</h1>
         </div>
@@ -156,7 +156,7 @@ function QuestionView({ session, onExit, onFinished }: { session: Session; onExi
         )}
 
         {item.mode === 'choice' ? (
-          <ul className="flex flex-col gap-3 list-none p-0 m-0" aria-label="Svarsalternativ">
+          <ul className="flex flex-col gap-3 list-none p-0 m-0" aria-label="Answer options">
             {item.options!.map((opt) => {
               const isRight = !!answered && opt === word.en;
               const isWrongPick = !!answered && !answered.correct && opt === answered.answer;
@@ -184,7 +184,7 @@ function QuestionView({ session, onExit, onFinished }: { session: Session; onExi
             }}
             className="flex flex-col gap-3"
           >
-            <label htmlFor="answer" className="sr-only">Ditt svar på engelska</label>
+            <label htmlFor="answer" className="sr-only">Your answer in English</label>
             <input
               id="answer"
               ref={inputRef}
@@ -199,12 +199,12 @@ function QuestionView({ session, onExit, onFinished }: { session: Session; onExi
               autoComplete="off"
               spellCheck={false}
               enterKeyHint="done"
-              placeholder="Skriv här…"
+              placeholder="Type here…"
             />
             {!answered && (
               <div className="flex gap-3">
-                <button type="submit" className="btn btn-primary flex-1" disabled={!text.trim()}>Svara</button>
-                <button type="button" className="btn btn-soft" onClick={() => submit('')}>Jag vet inte</button>
+                <button type="submit" className="btn btn-primary flex-1" disabled={!text.trim()}>Answer</button>
+                <button type="button" className="btn btn-soft" onClick={() => submit('')}>I don’t know</button>
               </div>
             )}
           </form>
@@ -215,26 +215,26 @@ function QuestionView({ session, onExit, onFinished }: { session: Session; onExi
             <div className="flex items-start justify-between gap-3">
               <div>
                 {answered.correct ? (
-                  <p className="text-lg">Rätt!</p>
+                  <p className="text-lg">Correct!</p>
                 ) : answered.verdict === 'typo' ? (
-                  <p>Nästan! Stava så här: <span lang="en" className="text-xl">{answered.expected}</span></p>
+                  <p>Almost! Spell it like this: <span lang="en" className="text-xl">{answered.expected}</span></p>
                 ) : (
-                  <p>Rätt svar: <span lang="en" className="text-xl">{answered.expected}</span></p>
+                  <p>Correct answer: <span lang="en" className="text-xl">{answered.expected}</span></p>
                 )}
-                {answered.reasked && !answered.correct && <p className="text-sm mt-1 font-bold">Vi tränar den igen strax.</p>}
-                {answered.reasked && answered.correct && <p className="text-sm mt-1 font-bold">Snart får du skriva den själv.</p>}
+                {answered.reasked && !answered.correct && <p className="text-sm mt-1 font-bold">We will practise it again soon.</p>}
+                {answered.reasked && answered.correct && <p className="text-sm mt-1 font-bold">Soon you will get to write it yourself.</p>}
                 {answered.evolved && creature && (
-                  <p className="mt-1">{speciesInfo(creature.species).name} har utvecklats!</p>
+                  <p className="mt-1">{speciesInfo(creature.species).name} has evolved!</p>
                 )}
               </div>
               {speechSupported() && (
-                <button type="button" className="icon-btn shrink-0" aria-label={`Lyssna på ${answered.expected}`} onClick={() => speak(item.mode === 'cloze' && item.prompt ? fillBlank(item.prompt, answered.expected) : answered.expected, { ...speech, enabled: true })}>
+                <button type="button" className="icon-btn shrink-0" aria-label={`Listen to ${answered.expected}`} onClick={() => speak(item.mode === 'cloze' && item.prompt ? fillBlank(item.prompt, answered.expected) : answered.expected, { ...speech, enabled: true })}>
                   <SpeakerIcon width="26" height="26" style={{ color: 'var(--color-lav-d)' }} />
                 </button>
               )}
             </div>
             {(answered.xp > 0 || answered.food > 0) && (
-              <p className="gain mt-2" aria-label={`Du fick ${answered.xp} poäng och ${answered.food} mat`}>
+              <p className="gain mt-2" aria-label={`You got ${answered.xp} points and ${answered.food} food`}>
                 <span className="inline-flex items-center gap-1"><StarIcon width="20" height="20" style={{ color: '#b07d00' }} />+{answered.xp}</span>
                 <span className="inline-flex items-center gap-1"><BerryIcon width="20" height="20" style={{ color: '#d6456b' }} />+{answered.food}</span>
               </p>
@@ -245,7 +245,7 @@ function QuestionView({ session, onExit, onFinished }: { session: Session; onExi
 
       {answered && (
         <button ref={nextRef} type="button" className="btn btn-primary btn-big w-full" onClick={next}>
-          {isLast ? 'Klar' : 'Nästa'}
+          {isLast ? 'Done' : 'Next'}
         </button>
       )}
     </div>
@@ -272,37 +272,37 @@ function Summary({ session, onExit, onHatch }: { session: Session; onExit: () =>
             <CreatureArt species={creature.species} stage={creature.stage} variant={creature.variant} mood="play" label={speciesInfo(creature.species).name} />
           </div>
         )}
-        <h1 className="h1">Bra jobbat!</h1>
-        <p className="text-xl font-extrabold">{s.correct} av {s.total} rätt</p>
+        <h1 className="h1">Well done!</h1>
+        <p className="text-xl font-extrabold">{s.correct} of {s.total} correct</p>
 
         {!session.extra && (
           <div className="flex gap-3 justify-center flex-wrap">
-            <span className="chip" aria-label={`${s.xp} poäng`}><StarIcon width="22" height="22" style={{ color: '#b07d00' }} />+{s.xp}</span>
-            <span className="chip" aria-label={`${s.food} mat`}><BerryIcon width="22" height="22" style={{ color: '#d6456b' }} />+{s.food}</span>
+            <span className="chip" aria-label={`${s.xp} points`}><StarIcon width="22" height="22" style={{ color: '#b07d00' }} />+{s.xp}</span>
+            <span className="chip" aria-label={`${s.food} food`}><BerryIcon width="22" height="22" style={{ color: '#d6456b' }} />+{s.food}</span>
           </div>
         )}
-        {session.extra && <p className="muted font-bold">Extra övning – inga belöningar den här gången.</p>}
+        {session.extra && <p className="muted font-bold">Extra practice – no rewards this time.</p>}
 
         {evolution && creature && (
           <div className="feedback good w-full">
-            {speciesInfo(creature.species).name} har utvecklats till nästa nivå!
+            {speciesInfo(creature.species).name} has grown to the next level!
           </div>
         )}
         {s.newEggs > 0 && (
           <button type="button" className="btn btn-peach w-full" onClick={onHatch}>
-            <EggIcon width="26" height="26" /> Du har ett nytt ägg! Kläck det
+            <EggIcon width="26" height="26" /> You have a new egg! Hatch it
           </button>
         )}
 
         {s.needsPractice.length > 0 && (
           <div className="card w-full text-left">
-            <h2 className="h2 mb-2">Tränar vi lite mer</h2>
+            <h2 className="h2 mb-2">A bit more practice</h2>
             <ul className="list-none p-0 m-0 flex flex-col gap-2">
               {s.needsPractice.map((n) => (
                 <li key={n.wordId} className="flex items-center justify-between gap-2">
                   <span><span className="font-extrabold">{n.sv}</span> <span className="muted">→</span> <span lang="en" className="font-extrabold" style={{ color: 'var(--color-lav-d)' }}>{n.en}</span></span>
                   {speechSupported() && (
-                    <button type="button" className="icon-btn" aria-label={`Lyssna på ${n.en}`} onClick={() => speak(n.en, { ...speech, enabled: true })} style={{ boxShadow: 'none' }}>
+                    <button type="button" className="icon-btn" aria-label={`Listen to ${n.en}`} onClick={() => speak(n.en, { ...speech, enabled: true })} style={{ boxShadow: 'none' }}>
                       <SpeakerIcon width="22" height="22" />
                     </button>
                   )}
@@ -312,7 +312,7 @@ function Summary({ session, onExit, onHatch }: { session: Session; onExit: () =>
           </div>
         )}
       </div>
-      <button type="button" className="btn btn-primary btn-big w-full mt-3" onClick={onExit}>Klar</button>
+      <button type="button" className="btn btn-primary btn-big w-full mt-3" onClick={onExit}>Done</button>
     </div>
   );
 }

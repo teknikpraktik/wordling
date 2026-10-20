@@ -23,14 +23,14 @@ const PAIRS = [
 describe('TrainScreen', () => {
   it('shows an empty state when there are no words', async () => {
     render(<TrainScreen onExit={() => {}} onHatch={() => {}} onImport={() => {}} />);
-    expect(await screen.findByText('Inga glosor än')).toBeInTheDocument();
+    expect(await screen.findByText('No words yet')).toBeInTheDocument();
   });
 
   it('asks a multiple-choice question, marks the right answer and gives a reward', async () => {
     await createList(db, { name: 'v1', weekNumber: 1 }, PAIRS);
     const user = userEvent.setup();
     render(<TrainScreen onExit={() => {}} onHatch={() => {}} onImport={() => {}} />);
-    await user.click(await screen.findByRole('button', { name: 'Starta' }));
+    await user.click(await screen.findByRole('button', { name: 'Start' }));
 
     const sv = (await waitFor(() => { const el = document.querySelector('.q-word'); if (!el) throw new Error('no question yet'); return el; })).textContent!;
     const en = PAIRS.find((p) => p.sv === sv)!.en;
@@ -39,9 +39,9 @@ describe('TrainScreen', () => {
     expect(options.filter((b) => b.textContent === en)).toHaveLength(1); // exactly one correct option
 
     await user.click(options.find((b) => b.textContent === en)!);
-    expect(await screen.findByText('Rätt!')).toBeInTheDocument();
+    expect(await screen.findByText('Correct!')).toBeInTheDocument();
     await waitFor(async () => expect((await db.game.get('main'))!.totalXp).toBe(5));
-    expect(screen.getByRole('button', { name: 'Nästa' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument();
     options.forEach((b) => expect(b).toBeDisabled()); // no second answer possible
   });
 
@@ -49,12 +49,12 @@ describe('TrainScreen', () => {
     await createList(db, { name: 'v1', weekNumber: 1 }, PAIRS);
     const user = userEvent.setup();
     render(<TrainScreen onExit={() => {}} onHatch={() => {}} onImport={() => {}} />);
-    await user.click(await screen.findByRole('button', { name: 'Starta' }));
+    await user.click(await screen.findByRole('button', { name: 'Start' }));
     const sv = (await waitFor(() => { const el = document.querySelector('.q-word'); if (!el) throw new Error('no question yet'); return el; })).textContent!;
     const en = PAIRS.find((p) => p.sv === sv)!.en;
     const wrong = screen.getAllByRole('button').filter((b) => b.classList.contains('choice') && b.textContent !== en)[0]!;
     await user.click(wrong);
-    expect(await screen.findByText(/Rätt svar:/)).toHaveTextContent(en);
+    expect(await screen.findByText(/Correct answer:/)).toHaveTextContent(en);
     expect((await db.game.get('main'))!.totalXp).toBe(0);
   });
 
@@ -68,9 +68,9 @@ describe('TrainScreen', () => {
     expect(sentence).toHaveTextContent('_____');
     expect(sentence).not.toHaveTextContent(/\bdog\b/);
     expect(screen.getByText('hund')).toBeInTheDocument();
-    await user.type(screen.getByLabelText('Ditt svar på engelska'), 'dog');
-    await user.click(screen.getByRole('button', { name: 'Svara' }));
+    await user.type(screen.getByLabelText('Your answer in English'), 'dog');
+    await user.click(screen.getByRole('button', { name: 'Answer' }));
     await waitFor(() => expect(screen.getByTestId('cloze-sentence')).toHaveTextContent('My dog likes to play in the garden.'));
-    expect(await screen.findByText('Rätt!')).toBeInTheDocument();
+    expect(await screen.findByText('Correct!')).toBeInTheDocument();
   });
 });

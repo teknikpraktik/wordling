@@ -81,10 +81,10 @@ export function pairsFromOcr(lines: OcrLine[], pageWidth: number): OcrRow[] {
         en: main.toLocaleLowerCase('en'),
         alts: alts.map((a) => a.toLocaleLowerCase('en')),
         confident: !lowConf,
-        note: lowConf ? 'Osäker avläsning – kontrollera' : undefined,
+        note: lowConf ? 'Unsure reading – please check' : undefined,
       });
     } else {
-      rows.push({ sv: '', en: text.toLocaleLowerCase('en'), alts: [], confident: false, note: 'Kunde inte avgöra vilket ord som hör ihop' });
+      rows.push({ sv: '', en: text.toLocaleLowerCase('en'), alts: [], confident: false, note: 'Could not tell which words belong together' });
     }
   }
   return rows;

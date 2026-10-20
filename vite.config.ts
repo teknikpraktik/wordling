@@ -14,8 +14,8 @@ export default defineConfig({
       manifest: {
         name: 'Wordling',
         short_name: 'Wordling',
-        description: 'Öva engelska glosor och samla söta figurer.',
-        lang: 'sv',
+        description: 'Practise English words and collect cute creatures.',
+        lang: 'en',
         start_url: '/',
         scope: '/',
         display: 'standalone',

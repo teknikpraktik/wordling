@@ -2,7 +2,7 @@
 
 En mobilanpassad engelsk glosapp (PWA) för barn. Veckans glosor övas med flervalsfrågor och skrivna svar, schemalagda med spaced repetition. Genom att öva växer och utvecklas söta figurer som man samlar. All data ligger lokalt på enheten: ingen inloggning, ingen backend, ingen spårning, inga externa anrop.
 
-Allt användargränssnitt är på svenska.
+Hela gränssnittet är på engelska (flikarna heter Home, Train, Family, Words). Glosorna går fortfarande från svenska till engelska. Dokumentationen är på svenska.
 
 ## Teknikstack
 
